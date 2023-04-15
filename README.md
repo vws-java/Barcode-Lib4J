@@ -27,3 +27,6 @@
 ## Requirements & Dependencies
 - Minimum Java Version: 9
 - [OpenPDF v1.3.30+](https://github.com/LibrePDF/OpenPDF) (A tiny version of the JAR ist included in the [release](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases))
+
+## Credits
+2D barcodes are provided by some slightly modified classes from the [ZXing](https://github.com/zxing/zxing) project. A factory class has been added to it to support above functions as well as GS1 versions of QR Code and DataMatrix.

@@ -2,7 +2,7 @@
 
 ## Features
 
-- Draw and print 1D & 2D barcodes via Java2D (java.awt.Graphics2D)
+- Draws and prints 1D & 2D barcodes via Java2D (java.awt.Graphics2D)
 - Export to PDF: PDF/X-1a:2001 compliance for CMYK, PDF/X-3:2002  compliance for RGB
 - Export to EPS: optional TIFF preview, RGB and CMYK
 - Export to SVG: RGB color model only

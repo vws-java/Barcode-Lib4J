@@ -30,7 +30,7 @@
 
 ## Get started
 - Download the source code and compile it yourself OR get the latest [All-In-One-Release](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)
-- Read [Tutorial.java](src/Tutorial.java) (it is also included in the release)
+- Read [Tutorial.java](src/Tutorial.java)
 
 ## Credits
 2D barcodes are provided by some slightly modified classes from the [ZXing](https://github.com/zxing/zxing) project. A factory class has been added to it to support above features as well as GS1 versions of QR Code and DataMatrix.

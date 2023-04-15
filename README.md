@@ -5,14 +5,14 @@
 - Draws and prints 1D & 2D barcodes via Java2D (java.awt.Graphics2D)
 - Export to PDF: PDF/X-1a:2001 compliance for CMYK, PDF/X-3:2002  compliance for RGB
 - Export to EPS: optional TIFF preview, RGB and CMYK
-- Export to SVG: RGB color model only
-- Export to PNG, BMP, JPG
+- Export to SVG: RGB colors only
+- Export to PNG, BMP, JPG: No unwanted effects such as aliasing etc.
 - Barcode precision, coordinates with 6 decimal places within all supported vector formats
-- **Adjustment of bar widths to printer resolution (essential for barcode quality when printing at <= 600 dpi)**
+- **Adjustment of bar widths to printer resolution (essential for proper barcode quality at <= 600 dpi)**
 - Colored or transparent background
-- Bar width correction (sometimes required when printing on inkjet printers)
+- Bar width reduction/correction (e.g. for dealing with ink spreading on inkjet printers)
 - Barcodes include minimum distances ("quiet zones")
-- Barcode number optionally on top, on bottom or invisible
+- Barcode number optionally on top, bottom or invisible
 - Customizable plain text line: font + font size, spacing, modifiable content
 - Automatic adjustment of the font size, if requested
 - Advanced setting: printing with a self-defined module width
@@ -28,7 +28,7 @@
 
 ## Requirements & Dependencies
 - Minimum Java Version: 9
-- [OpenPDF](https://github.com/LibrePDF/OpenPDF)
+- Optional: [OpenPDF](https://github.com/LibrePDF/OpenPDF) for PDF export
 
 ## Get started
 - Download the source code (+dependency) and compile it yourself OR get the latest [All-In-One-ZIP](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)

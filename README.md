@@ -1,4 +1,4 @@
-<img align="right" width="120" height="120" src="https://user-images.githubusercontent.com/130756709/232241602-ad198ee9-8daf-45b0-a530-b0a9aa8050b4.png">
+<img align="right" width="120" height="120" src="https://user-images.githubusercontent.com/130756709/232241997-7826bd94-1342-4aa6-8bfc-728c59eb6cb5.png">
 
 ## Features
 

@@ -23,3 +23,7 @@
 **1D:** Code 128, Code 128 A, Code 128 B, Code 128 C, 2 of 5 Interleaved, Code 39, Code 39 Extended, GS1-128 (EAN-128), GTIN-13 (EAN-13), GTIN-8 (EAN-8), UPC-A, ISBN-13, ISMN, Code 93, Code 93 Extended, GTIN-14 (EAN-14), SSCC-18 (NVE), PZN, PZN8, Codabar.
 
 **2D:** QR Code, GS1 QR Code, DataMatrix, GS1 DataMatrix, PDF417, Aztec.
+
+## Requirements & Dependencies
+- Minimum Java Version: 9
+- [OpenPDF v1.3.30+](https://github.com/LibrePDF/OpenPDF) (A tiny version of the JAR ist included in everey [release](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)

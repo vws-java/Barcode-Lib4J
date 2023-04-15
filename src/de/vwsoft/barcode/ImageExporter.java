@@ -49,6 +49,14 @@ public class ImageExporter {
   public static final int TRANSFORM_180N = 6;
   public static final int TRANSFORM_270N = 7;
 
+  private static boolean OPEN_PDF_IS_PRESENT;
+  static {
+    try {
+      Class.forName("com.lowagie.text.pdf.PdfWriter");
+      OPEN_PDF_IS_PRESENT = true;
+    } catch (ClassNotFoundException e) {}
+  }
+
   // for 'eps' and 'svg'; round to max. 6 decimal places
   private static final DecimalFormat DEC_FORMAT = // second parameter ensures '.' as separator
       new DecimalFormat("#.######", new DecimalFormatSymbols(Locale.US));
@@ -155,64 +163,71 @@ public class ImageExporter {
 
   //----
   public void writePDF(OutputStream out, int colorSpace) throws IOException {
-    boolean oldPrecision = ByteBuffer.HIGH_PRECISION;
-    ByteBuffer.HIGH_PRECISION = true; // 6 digits after decimal point instead of 2
+    if (!OPEN_PDF_IS_PRESENT)
+      throw new IOException("OpenPDF library is not linked");
 
-    final double scale = 72.0 / 25.4; // mm to 1/72 inch
-    Point2D.Double size = getMySize();
-    Point2D.Float docSize = new Point2D.Float((float)(size.x * scale), (float)(size.y * scale));
+    // embed any call to OpenPDF into a wrapper class to make dependency optional
+    class OpenPDFWrapper {
+      OpenPDFWrapper() throws IOException {
+        boolean oldPrecision = ByteBuffer.HIGH_PRECISION;
+        ByteBuffer.HIGH_PRECISION = true; // 6 digits after decimal point instead of 2
 
-    com.lowagie.text.Rectangle rect = new com.lowagie.text.Rectangle(docSize.x, docSize.y);
-    if (myIsOpaque)
-      rect.setBackgroundColor(getColorForPDF(myBackground, colorSpace));
-    com.lowagie.text.Document document = new com.lowagie.text.Document(rect);
+        final double scale = 72.0 / 25.4; // mm to 1/72 inch
+        Point2D.Double size = getMySize();
+        Point2D.Float docSize = new Point2D.Float((float)(size.x * scale), (float)(size.y * scale));
 
-    PdfWriter writer = PdfWriter.getInstance(document, out);
-    writer.setCompressionLevel(PdfStream.BEST_COMPRESSION);
-    writer.setPDFXConformance(colorSpace == COLORSPACE_CMYK ?
-        PdfWriter.PDFX1A2001 : PdfWriter.PDFX32002);
+        com.lowagie.text.Rectangle rect = new com.lowagie.text.Rectangle(docSize.x, docSize.y);
+        if (myIsOpaque)
+          rect.setBackgroundColor(getColorForPDF(myBackground));
+        com.lowagie.text.Document document = new com.lowagie.text.Document(rect);
 
-    document.open();
-    if (myTitle != null)
-      document.addTitle(myTitle);
-    if (myCreator != null) {
-      document.addCreator(myCreator);
-      document.addProducer(myCreator);
+        PdfWriter writer = PdfWriter.getInstance(document, out);
+        writer.setCompressionLevel(PdfStream.BEST_COMPRESSION);
+        writer.setPDFXConformance(colorSpace == COLORSPACE_CMYK ?
+            PdfWriter.PDFX1A2001 : PdfWriter.PDFX32002);
+
+        document.open();
+        if (myTitle != null)
+          document.addTitle(myTitle);
+        if (myCreator != null) {
+          document.addCreator(myCreator);
+          document.addProducer(myCreator);
+        }
+        document.addSubject(colorSpace == COLORSPACE_CMYK ?
+            "PDF/X-1a:2001, CMYK colors" : "PDF/X-3:2002, RGB colors");
+
+        PdfGraphics2D g2d = new PdfGraphics2D(writer.getDirectContent(), docSize.x, docSize.y,
+            null, true, false, 1F);
+
+        AffineTransform at = AffineTransform.getScaleInstance(scale, scale);
+        at.concatenate(getMyTransform());
+        g2d.setTransform(at);
+
+        g2d.setColor(getColorForPDF(myForeground));
+        g2d.fill(myGraphics2D.getAllShapes());
+
+        g2d.dispose();
+
+        // by default pdf readers should NOT scale the document when printing
+        writer.addViewerPreference(PdfName.PRINTSCALING, PdfName.NONE);
+        // set zoom to 100% when opening the document (otherwise it fits to window)
+        PdfDestination pdfDest = new PdfDestination(PdfDestination.XYZ, 0F, docSize.y, 1F);
+        writer.setOpenAction(PdfAction.gotoLocalPage(1, pdfDest, writer));
+
+        document.close();
+
+        writer.close();
+
+        ByteBuffer.HIGH_PRECISION = oldPrecision; // set static variable back to former value
+      }
+      Color getColorForPDF(CompoundColor cc) {
+        return colorSpace == COLORSPACE_RGB ? cc :
+            new CMYKColor(cc.getCyan()   / 100F, cc.getMagenta() / 100F,
+                          cc.getYellow() / 100F, cc.getKey()     / 100F);
+      }
     }
-    document.addSubject(colorSpace == COLORSPACE_CMYK ?
-        "PDF/X-1a:2001, CMYK colors" : "PDF/X-3:2002, RGB colors");
 
-    PdfGraphics2D g2d = new PdfGraphics2D(writer.getDirectContent(), docSize.x, docSize.y,
-        null, true, false, 1F);
-
-    AffineTransform at = AffineTransform.getScaleInstance(scale, scale);
-    at.concatenate(getMyTransform());
-    g2d.setTransform(at);
-
-    g2d.setColor(getColorForPDF(myForeground, colorSpace));
-    g2d.fill(myGraphics2D.getAllShapes());
-
-    g2d.dispose();
-
-    // by default pdf readers should NOT scale the document when printing
-    writer.addViewerPreference(PdfName.PRINTSCALING, PdfName.NONE);
-    // set zoom to 100% when opening the document (otherwise it fits to window)
-    PdfDestination pdfDest = new PdfDestination(PdfDestination.XYZ, 0F, docSize.y, 1F);
-    writer.setOpenAction(PdfAction.gotoLocalPage(1, pdfDest, writer));
-
-    document.close();
-
-    writer.close();
-
-    ByteBuffer.HIGH_PRECISION = oldPrecision; // set static variable back to former value
-  }
-
-
-  //----
-  private static Color getColorForPDF(CompoundColor cc, int colorSpace) {
-    return colorSpace == COLORSPACE_RGB ? cc :
-        new CMYKColor(cc.getCyan()   / 100F, cc.getMagenta() / 100F,
-                      cc.getYellow() / 100F, cc.getKey()     / 100F);
+    new OpenPDFWrapper();
   }
 
 

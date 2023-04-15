@@ -26,7 +26,7 @@
 
 ## Requirements & Dependencies
 - Minimum Java Version: 9
-- [OpenPDF](https://github.com/LibrePDF/OpenPDF) (A tiny, downsized version of the JAR is included in the All-In-One-Release)
+- [OpenPDF](https://github.com/LibrePDF/OpenPDF)
 
 ## Get started
 - Download the source code (+mentioned dependency) and compile it yourself OR get the latest [All-In-One-Release](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)

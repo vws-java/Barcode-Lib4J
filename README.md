@@ -1,6 +1,3 @@
-## Summary
-Barcode-Lib4J - Draw and print 1D & 2D barcodes via Java2D, export to PDF, EPS, SVG, PNG, BMP, JPG. Account for low resolution and inkjet printers.
-
 ## Features
 
 - Draw and print 1D & 2D barcodes via Java2D (java.awt.Graphics2D)

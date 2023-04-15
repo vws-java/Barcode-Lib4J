@@ -1,5 +1,4 @@
 <img align="right" width="120" height="120" src="https://user-images.githubusercontent.com/130756709/232242399-81d7d770-4c66-469c-b1fd-a2ad6531d212.png">
-
 ## Features
 
 - Draw and print 1D & 2D barcodes via Java2D (java.awt.Graphics2D)

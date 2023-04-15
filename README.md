@@ -31,7 +31,7 @@
 - Optional: [OpenPDF](https://github.com/LibrePDF/OpenPDF) for PDF export
 
 ## Get started
-- Download the source code (+dependency) and compile it yourself OR get the latest [All-In-One-ZIP](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)
+- Download the source code (+dependency) and compile it yourself OR get the latest [JAR](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)
 - Read [Tutorial.java](src/Tutorial.java)
 
 ## Credits

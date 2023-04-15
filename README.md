@@ -7,7 +7,7 @@
 - Export to PNG, BMP, JPG
 - Barcode precision, coordinates with 6 decimal places within all supported vector formats
 - Colored or transparent background
-- Adjustment of bars to printer resolution (essential for barcode quality when printing at <= 600 dpi)
+- **Adjustment of bars to printer resolution (essential for barcode quality when printing at <= 600 dpi)**
 - Bar width correction
 - Barcodes include minimum distances ("quiet zones")
 - Barcode number optionally on top, at the bottom or invisible

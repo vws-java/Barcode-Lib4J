@@ -29,7 +29,7 @@
 - [OpenPDF](https://github.com/LibrePDF/OpenPDF)
 
 ## Get started
-- Download the source code (+mentioned dependency) and compile it yourself OR get the latest [All-In-One-Release](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)
+- Download the source code (+dependency) and compile it yourself OR get the latest [All-In-One-Release](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)
 - Read [Tutorial.java](src/Tutorial.java)
 
 ## Credits

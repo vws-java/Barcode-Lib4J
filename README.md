@@ -19,7 +19,7 @@
 - Rotation in 90° steps
 - Configurable ratio from 2:1 to 3:1 for barcode types that support it
 - Add-On 2/5 for barcodes like EAN-13, EAN-8, ISBN-13 and UPC-A, additional plain text line for ISBN and ISMN
-- Full support for GS1 barcodes: Data integrity check, validitation of application identifiers, checking length and content of user data, verifying/calculation of check digit for SSCC and GTIN, etc.
+- Full support for GS1 barcodes: Data integrity check, validitation of application identifiers, checking length and content of user data, verifying/calculation of the check digit in SSCC and GTIN, etc.
 
 ## Supported Barcodes
 **1D:** Code 128, Code 128 A, Code 128 B, Code 128 C, 2 of 5 Interleaved, Code 39, Code 39 Extended, GS1-128 (EAN-128), GTIN-13 (EAN-13), GTIN-8 (EAN-8), UPC-A, ISBN-13, ISMN, Code 93, Code 93 Extended, GTIN-14 (EAN-14), SSCC-18 (NVE), PZN, PZN8, Codabar.

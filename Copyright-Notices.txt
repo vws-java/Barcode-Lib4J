@@ -1,0 +1,20 @@
+1. Barcode-Lib4J classes cover 1D barcodes and some additional functions such as
+   drawing and writing barcodes to image files. They reside in the folder and
+   its subfolders:
+
+       de/vwsoft/
+
+       Copyright (c) by V. Wedel, https://www.vwsoft.de/
+
+
+2. 2D barcodes are provided by some slightly modified classes from the ZXing
+   project. A factory class has been added to support above functions as well as
+   GS1 versions of QR Code and DataMatrix. The respective files are located in
+   the folder and its subfolders:
+
+       twodcodes/
+
+       Copyright (c) by the ZXing authors, https://github.com/zxing
+
+
+The above two parts are published under the terms of the “Apache 2.0 License”.

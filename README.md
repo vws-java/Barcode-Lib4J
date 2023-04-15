@@ -26,4 +26,4 @@
 
 ## Requirements & Dependencies
 - Minimum Java Version: 9
-- [OpenPDF v1.3.30+](https://github.com/LibrePDF/OpenPDF) (A tiny version of the JAR ist included in everey [release](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)
+- [OpenPDF v1.3.30+](https://github.com/LibrePDF/OpenPDF) (A tiny version of the JAR ist included in the [release](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases))

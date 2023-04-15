@@ -1,4 +1,4 @@
-<img align="right" width="120" height="120" src="https://user-images.githubusercontent.com/130756709/232240594-274e4715-e562-42c3-a68b-f088520c613a.png">
+<img align="right" width="120" height="120" src="https://user-images.githubusercontent.com/130756709/232241602-ad198ee9-8daf-45b0-a530-b0a9aa8050b4.png">
 
 ## Supported Barcodes
 **1D:** Code 128, Code 128 A, Code 128 B, Code 128 C, 2 of 5 Interleaved, Code 39, Code 39 Extended, GS1-128 (EAN-128), GTIN-13 (EAN-13), GTIN-8 (EAN-8), UPC-A, ISBN-13, ISMN, Code 93, Code 93 Extended, GTIN-14 (EAN-14), SSCC-18 (NVE), PZN, PZN8, Codabar.

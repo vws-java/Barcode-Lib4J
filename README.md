@@ -3,10 +3,10 @@
 ## Features
 
 - Draws and prints 1D & 2D barcodes via Java2D (java.awt.Graphics2D)
-- Export to PDF: PDF/X-1a:2001 compliance for CMYK, PDF/X-3:2002  compliance for RGB
+- Export to PDF: PDF/X-1a:2001 compliant for CMYK, PDF/X-3:2002 compliant for RGB
 - Export to EPS: optional TIFF preview, RGB and CMYK
 - Export to SVG: RGB colors only
-- Export to PNG, BMP, JPG: No unwanted effects such as aliasing etc.
+- Export to PNG, BMP, JPG: No unwanted effects such as aliasing, etc.
 - Barcode precision, coordinates are stored with 6 decimal places within all supported vector formats
 - **Adjustment of bar widths to printer resolution (essential for proper barcode quality at <= 600 dpi)**
 - Colored or transparent background
@@ -15,10 +15,10 @@
 - Barcode number optionally on top, bottom or invisible
 - Customizable plain text line: font + font size, spacing, modifiable content
 - Automatic adjustment of the font size, if requested
-- Advanced setting: printing with a self-defined module width
-- Rotation in 90° steps
+- Pro setting: printing with a self-defined module width
+- Rotation in 90-degree increments
 - Configurable ratio from 2:1 to 3:1 for barcode types that support it
-- Add-On 2/5 for barcodes like EAN-13, EAN-8, ISBN-13 and UPC-A, additional plain text line for ISBN and ISMN
+- Add-On 2/5 for barcodes such as EAN-13, EAN-8, ISBN-13 and UPC-A, second plain text line for ISBN and ISMN
 - Full support for GS1 barcodes: Data integrity check, validitation of application identifiers, checking length and content of user data, verifying/calculation of the check digit in SSCC and GTIN, etc.
 
 ## Supported Barcodes

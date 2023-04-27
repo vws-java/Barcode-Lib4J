@@ -9,8 +9,8 @@
 - Export to PNG, BMP, JPG: No unwanted effects such as aliasing, etc.
 - Barcode precision, coordinates are stored with 6 decimal places within all supported vector formats
 - **Adjustment of bar widths to printer resolution (essential for proper barcode quality at <= 600 dpi)**
-- Colored or transparent background
 - Bar width reduction/correction (e.g. for dealing with ink spreading on inkjet printers)
+- Background colored or transparent (supported by EPS, PDF, SVG and PNG)
 - Barcodes include minimum distances ("quiet zones")
 - Barcode number optionally on top, bottom or invisible
 - Customizable plain text line: font + font size, spacing, modifiable content

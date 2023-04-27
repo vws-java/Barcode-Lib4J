@@ -10,12 +10,12 @@
 - Barcode precision, coordinates are stored with 6 decimal places within all supported vector formats
 - **Adjustment of bar widths to printer resolution (essential for proper barcode quality at <= 600 dpi)**
 - Bar width reduction/correction (e.g. for dealing with ink spreading on inkjet printers)
-- Background colored or transparent (supported by EPS, PDF, SVG and PNG)
 - Barcodes include minimum distances ("quiet zones")
 - Barcode number optionally on top, bottom or invisible
 - Customizable plain text line: font + font size, spacing, modifiable content
 - Automatic adjustment of the font size, if requested
 - Pro setting: printing with a self-defined module width
+- Optionally transparent background (Supported in EPS, PDF, SVG and PNG)
 - Rotation in 90-degree increments
 - Configurable ratio from 2:1 to 3:1 for barcode types that support it
 - Add-On 2/5 for barcodes such as EAN-13, EAN-8, ISBN-13 and UPC-A, second plain text line for ISBN and ISMN

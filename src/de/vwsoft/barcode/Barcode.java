@@ -347,20 +347,8 @@ public abstract class Barcode implements Cloneable {
 
 
   //----
-  public void draw(Graphics2D g2d, double x, double y, double w, double h, double dotSize,
-      int dotsPerModule, double barWidthCorrection) {
-    if (dotSize > 0.0) {
-      double d;
-      if (dotsPerModule > 0) {
-        d = dotsPerModule * dotSize * myModuleFactor;
-      } else {
-        d = w / myModuleFactor;
-        d = w * (int)(d / dotSize) * dotSize / d;
-      }
-      x += (w - d) / 2.0;
-      w = d;
-    }
-    draw(g2d, x, y, w, h, barWidthCorrection);
+  public void draw(Graphics2D g2d, double x, double y, double w, double h) {
+    draw(g2d, x, y, w, h, 0.0);
   }
 
 

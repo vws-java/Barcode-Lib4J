@@ -6,8 +6,8 @@
 - Export to PDF: PDF/X-1a:2001 compliant for CMYK, PDF/X-3:2002 compliant for RGB
 - Export to EPS: optional TIFF preview, RGB and CMYK
 - Export to SVG: RGB colors only
-- Export to PNG, BMP, JPG: No unwanted effects such as aliasing, etc.
 - Barcode precision, coordinates are stored with 6 decimal places within all supported vector formats
+- Export to PNG, BMP, JPG: No unwanted effects such as aliasing, etc. Storage of the DPI resolution in file header
 - **Adjustment of bar widths to printer resolution (essential for proper barcode quality at <= 600 dpi)**
 - Bar width reduction/correction (e.g. for dealing with ink spreading on inkjet printers)
 - Barcodes include minimum distances ("quiet zones")

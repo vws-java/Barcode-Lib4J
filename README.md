@@ -9,7 +9,7 @@
 - Barcode precision, coordinates are stored with 6 decimal places within all supported vector formats
 - Export to PNG, BMP, JPG: Storage of DPI resolution in file header. No unwanted effects such as aliasing, etc.
 - **Adjustment of bar widths to printer resolution (essential for proper barcode quality at <= 600 dpi)**
-- Bar width reduction/correction (e.g. for dealing with ink spreading on inkjet printers)
+- Bar width reduction/correction (e.g. for dealing with ink spread on inkjet printers)
 - Barcodes include minimum distances ("quiet zones")
 - Barcode number optionally on top, bottom or invisible
 - Customizable plain text line: font + font size, spacing, modifiable content

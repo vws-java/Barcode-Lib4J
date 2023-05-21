@@ -261,8 +261,20 @@ public class TwoDCode implements Cloneable {
 
 
   //----
+  public void draw(Graphics2D g2d, Rectangle2D.Double r) {
+    draw(g2d, r, 0.0, 0.0, 0.0);
+  }
+
+
+  //----
+  public void draw(Graphics2D g2d, Rectangle2D.Double r, double dotSize) {
+    draw(g2d, r, dotSize, 0.0, 0.0);
+  }
+
+
+  //----
   public void draw(Graphics2D g2d, Rectangle2D.Double r, double dotSize,
-      double horBWC, double verBWC) {
+      double horBarWidthCorrection, double verBarWidthCorrection) {
     if (!isValid())
       return;
 
@@ -282,10 +294,10 @@ public class TwoDCode implements Cloneable {
       g2d.fill(r);
     }
 
-    double horBWC2 = horBWC * 2.0;
-    double verBWC2 = verBWC * 2.0;
-    double shiftedX = r.x - horBWC;
-    double shiftedY = r.y - verBWC;
+    double horBWC2 = horBarWidthCorrection * 2.0;
+    double verBWC2 = verBarWidthCorrection * 2.0;
+    double shiftedX = r.x - horBarWidthCorrection;
+    double shiftedY = r.y - verBarWidthCorrection;
     Rectangle2D.Double chunk = new Rectangle2D.Double();
     g2d.setColor(pForegroundColor);
     for (int i=myCodeChunks.size()-1; i>=0; i--) {

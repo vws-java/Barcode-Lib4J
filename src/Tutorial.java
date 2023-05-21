@@ -14,12 +14,12 @@ import java.io.*;
 
     And for creation of image files:
 
-        de.vwsoft.barcode.ImageExporter – Provides a Graphics2D instance, writes images to files
-        de.vwsoft.common.awt.CompoundColor – Holds a color as RGB and as CMYK in one instance
+        de.vwsoft.barcode.ImageExporter – Provides a Graphics2D instance, generates images
+        de.vwsoft.common.awt.CompoundColor – Stores a color in both RGB and CMYK spaces at once
 
-    The following example shows how 1D and 2D barcodes can be generated and saved as a bitmap.
+    Following example demonstrates how 1D and 2D barcodes can be generated and saved as a bitmap.
 
-    The process of image creation is not much different from printing, so both cases will be
+    The process of creating images is quite similar to that of printing, so both cases will be
     covered in this tutorial.
 */
 
@@ -27,10 +27,10 @@ public class Tutorial {
 
   public static void main(String args[]) {
 
-    // For bitmap images, a resolution must be specified. The resolution should match that of the
-    // printer used for printing the image. For vector formats, specifying a resolution is optional,
-    // but is still recommended if the vector image is intended to be printed on a printer with a
-    // low resolution (<= 600 dpi).
+    // For bitmap images, a resolution must be specified. The resolution should correspond to that
+    // of the printer on which the image will be printed later. For vector formats, specifying a
+    // resolution is optional, but still recommended if the vector image is to be printed on a low
+    // resolution printer (<= 600 dpi).
 
     // A typical (low) resolution of an average thermal transfer label printer
     final int horResolutionDPI = 300;
@@ -39,7 +39,7 @@ public class Tutorial {
     // Barcode dimensions in millimeters - for a better overview we use the same ones for 1D and 2D
     final double widthMM = 40.0, heightMM = 30.0;
 
-    // Note: Formats that additionally support transparent backgrounds are: PDF, EPS, SVG, PNG.
+    // Note: Image formats that optionally support transparent background: PDF, EPS, SVG, PNG.
     final String exportFile1D = "EAN-13.jpg";
     // Note: Although JPEGs are generated with a quality factor of 1.0 and appearances of JPEG
     // artifacts are unlikely due to the high contrast, PNG and BMP should still be preferred as
@@ -68,7 +68,7 @@ public class Tutorial {
     //
     // For other barcode types, one or even both parameters may have no function. See source code of
     // the respective barcode type.
-    bc1D.setNumber("123456789012", true, false); // Let the method calc the EAN-13 check digit
+    bc1D.setNumber("123456789012", true, false); // We let the lib calculate the check digit for us
 
     // The SIZE of the font is ignored and must be set explicitly using "setFixedFontSize" if
     // required. If not set, the font size will be automatically adjusted by default.
@@ -79,7 +79,7 @@ public class Tutorial {
     // For 1D barcodes, only one of the two resolutions is relevant here. When printing at
     // 90° or 270°, the VERTICAL resolution should be passed instead.
     double sizeOfADotMM = 25.4 / horResolutionDPI;
-    bc1D.draw(ie.getGraphics2D(), 0.0, 0.0, widthMM, heightMM, sizeOfADotMM, 0, 0.0);
+    bc1D.draw(ie.getGraphics2D(), 0.0, 0.0, widthMM, heightMM, sizeOfADotMM, 0.0, 0.0);
 
     try (FileOutputStream fos = new FileOutputStream(exportFile1D)) {
       ie.writeJPG(fos, horResolutionDPI, verResolutionDPI);
@@ -100,19 +100,18 @@ public class Tutorial {
     // Once all needed properties are set, a call to "update()" must follow to rebuild the barcode.
     bc2D.update();
 
-    // An instance of "ImageExporter" can not be reused, so we have to create us a new one
+    // An instance of "ImageExporter" can not be reused, so we have to create a new one
     ImageExporter ie2 = new ImageExporter(widthMM, heightMM);
 
-    // Important! If colors other than black code on a white background are intended, the new colors
+    // Note: If colors other than black code on a white background are intended, the new colors
     // should be set at "ImageExporter", not at "TwoDCode". Same with transparency. Example:
     ie2.setForeground(new CompoundColor(30, 20, 220));
     ie2.setOpaque(false); // Transparent background
 
-    // Important! For 2D codes, the smaller resolution should be used (regardless of the angle at
+    // Note: For 2D codes, the smaller resolution should be used (regardless of the angle at
     // which it is printed):
     double dotSizeMM = 25.4 / Math.min(horResolutionDPI, verResolutionDPI);
-    bc2D.draw(ie2.getGraphics2D(), new  Rectangle2D.Double(0.0, 0.0, widthMM, heightMM),
-        dotSizeMM, 0.0, 0.0);
+    bc2D.draw(ie2.getGraphics2D(), new  Rectangle2D.Double(0.0, 0.0, widthMM, heightMM), dotSizeMM);
 
     try (FileOutputStream fos = new FileOutputStream(exportFile2D)) {
       ie2.writePNG(fos, horResolutionDPI, verResolutionDPI);

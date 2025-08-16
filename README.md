@@ -1,4 +1,6 @@
-<img align="right" width="120" height="120" src="https://user-images.githubusercontent.com/130756709/232242399-81d7d770-4c66-469c-b1fd-a2ad6531d212.png">
+<div align="center">
+  <img width="500" height="110" src="https://www.vw-software.com/img/pgmlogo7big.webp">
+</div>
 
 ## Features
 - Drawing and printing of 1D and 2D barcodes using Java2D (java.awt.Graphics2D)
@@ -27,9 +29,9 @@
 - Minimum Java Version: 9
 - Optional: [OpenPDF](https://github.com/LibrePDF/OpenPDF) for PDF export
 
-## Get started
-- Download the source code (+dependency) and compile it on your own OR get the latest [JAR](https://github.com/Barcode-Lib4J/Barcode-Lib4J/releases)
-- Read [Tutorial.java](src/Tutorial.java)
+## Getting started
+- Download the source code (+dependency) and compile it on your own **OR** download the latest ZIP file with the source code, precompiled JAR and JavaDocs from the [Barcode-Lib4J Official Product Website](https://www.vw-software.com/java-barcode-library/)
+- See tutorial with several examples for different use cases (same Link as above)
 
 ## Credits
 2D barcodes are provided by some slightly modified classes from the [ZXing](https://github.com/zxing/zxing) project. A factory class has been added to it to support above features as well as GS1 versions of QR Code and DataMatrix.

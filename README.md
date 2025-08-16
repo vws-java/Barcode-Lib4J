@@ -20,10 +20,16 @@
 - Add-Ons 2 or 5 for the barcode types EAN-13, EAN-8, UPC-A, UPC-E, ISBN-13 and ISMN; second plain text line for ISBN-13 and ISMN
 - **Comprehensive support for GS1-128, GS1 DataMatrix and GS1 QR Code:** Verification of data integrity such as correctness of application identifiers, length and format of individual data elements, verification/calculation of the check digit in SSCC and GTIN and more
 
-## Supported 1D and 2D Barcodes
-**1D:** Code 128, Code 128 A, Code 128 B, Code 128 C, 2 of 5 Interleaved, Code 39, Code 39 Extended, GS1-128 (EAN-128), GTIN-13 (EAN-13), GTIN-8 (EAN-8), UPC-A, ISBN-13, ISMN, Code 93, Code 93 Extended, GTIN-14 (EAN-14), SSCC-18 (NVE), PZN, PZN8, Codabar.
+## Supported Barcodes
 
-**2D:** QR Code, GS1 QR Code, DataMatrix, GS1 DataMatrix, PDF417, Aztec.
+| 1D Barcodes | 2D Barcodes |
+|-------------|-------------|
+| Code 128, Code 128 A, Code 128 B, Code 128 C | QR Code |
+| 2 of 5 Interleaved, Code 39, Code 39 Extended | GS1 QR Code |
+| GS1-128 (EAN-128), GTIN-13 (EAN-13), GTIN-8 (EAN-8) | DataMatrix |
+| UPC-A, ISBN-13, ISMN | GS1 DataMatrix |
+| Code 93, Code 93 Extended, GTIN-14 (EAN-14) | PDF417 |
+| SSCC-18 (NVE), PZN, PZN8, Codabar | Aztec |
 
 ## Requirements & Dependencies
 - Minimum Java Version: 9

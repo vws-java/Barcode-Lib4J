@@ -56,6 +56,7 @@ Download the latest ZIP file with source code, precompiled JAR and JavaDocs from
 
 ### &#9656;&#9656; Recommended: Documentation & Examples
 Tutorial and examples: [Official Product Website](https://www.vw-software.com/java-barcode-library/)
+
 <br>
 
 ## Credits

@@ -1,11 +1,14 @@
 <div align="center">
-  <img width="500" height="110" src="https://github.com/user-attachments/assets/ec774370-63be-4db3-9cb4-e6561918a807">
+  <img width="500" height="110" src="https://github.com/user-attachments/assets/ec774370-63be-4db3-9cb4-e6561918a807" alt="Barcode-Lib4J Logo">
 </div>
 <br>
 <p align="center">
   <strong><em>Java library for creating, printing and storing 1D and 2D barcodes as vector (PDF, EPS, SVG) and raster (PNG, BMP, JPG) images. Proven in practice through use in our commercial software products.</em></strong>
 </p>
 <br>
+<div align="center">
+  <img width="180" height="124" src="https://github.com/user-attachments/assets/564e9ae4-2c5b-46a6-8aa1-a67788d966f5" alt="Supported Image Formats">
+</div>
 
 ## Features
 - Drawing and printing of 1D and 2D barcodes using Java2D (java.awt.Graphics2D)

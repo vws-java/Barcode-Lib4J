@@ -1,0 +1,41 @@
+
+                            Barcode-Lib4J v2.0.2
+
+
+Java Version and Dependencies
+=============================
+
+Java 9 or later is required. OpenPDF library v1.3.0 or higher is optionally
+needed for PDF export functionality.
+
+
+Copyright
+=========
+
+1. Barcode-Lib4J covers 1D barcodes, 2D code wrapper classes and functions
+   for accurate drawing, printing and writing of barcodes to image files.
+   The respective classes are located in the following packages:
+
+       de/vwsoft/barcodelib4j/oned
+       de/vwsoft/barcodelib4j/twod
+       de/vwsoft/barcodelib4j/image
+
+       Copyright (c) 2025 Viktor Wedel, https://www.vw-software.com/
+                                        https://www.vwsoft.de/
+
+2. 2D code implementations are provided by adapted classes from ZXing v3.5.3.
+   Wrapper classes have been added to support the above features, as well as
+   support for GS1 DataMatrix in non-compact mode. The built-in ZXing classes
+   are located in the following packages:
+
+       de/vwsoft/barcodelib4j/twod/zxing
+       de/vwsoft/barcodelib4j/twod/zxing/common
+       de/vwsoft/barcodelib4j/twod/aztec
+       de/vwsoft/barcodelib4j/twod/datamatrix
+       de/vwsoft/barcodelib4j/twod/pdf417
+       de/vwsoft/barcodelib4j/twod/qrcode
+
+       Copyright (c) ZXing authors, https://github.com/zxing/zxing
+
+Both components are published under the terms of the "Apache 2.0 License"
+which can be found in the LICENSE file.

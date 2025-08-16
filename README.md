@@ -52,10 +52,10 @@ Add the dependency via Maven Central - copy the snippet for Maven, Gradle, or yo
 [![Maven Central](https://img.shields.io/maven-central/v/de.vwsoft/barcodelib4j.svg)](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
 
 ### &#9656;&#9656; Method 2: Manual Download
-Download the latest ZIP file with source code, precompiled JAR and JavaDocs from the [Barcode-Lib4J Official Product Website](https://www.vw-software.com/java-barcode-library/)
+Download the latest ZIP file with source code, precompiled JAR and JavaDocs from the [Official Product Website](https://www.vw-software.com/java-barcode-library/)
 
 ### &#9656;&#9656; Recommended: Documentation & Examples
-Tutorial and examples: [Barcode-Lib4J Official Product Website](https://www.vw-software.com/java-barcode-library/)
+Tutorial and examples: [Official Product Website](https://www.vw-software.com/java-barcode-library/)
 <br>
 
 ## Credits

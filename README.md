@@ -43,7 +43,7 @@
 
 ## Requirements & Dependencies
 - Minimum Java Version: 9
-- Optional: OpenPDF for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf)
+- Optional: OpenPDF 1.3.0+ for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf)
 <br>
 
 ## Getting started

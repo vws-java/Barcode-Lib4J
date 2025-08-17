@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Barcode-Lib4J</name>
-    <description>Barcode library for Java. Generates 1D and 2D barcodes, draws to Graphics2D, saves barcode images in vector (EPS, PDF, SVG) and raster (PNG, BMP, JPG) formats.</description>
+    <description>Barcode generation library for Java. Supports EAN, UPC, GS1-128, QR Code, DataMatrix and other 1D/2D barcodes. Renders to Graphics2D or exports barcodes as vector graphics (SVG, PDF, EPS) or raster images (PNG, BMP, JPEG).</description>
     <url>https://www.vw-software.com/java-barcode-library/</url>
 
     <licenses>
@@ -126,16 +126,15 @@
                         </executions>
                     </plugin>
 
-                    <!-- Nexus Staging Plugin for Maven Central deployment -->
+                    <!-- Central Publishing Plugin for Sonatype Central -->
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.13</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.4.0</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <publishingServerId>central</publishingServerId>
+                            <tokenAuth>true</tokenAuth>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -143,15 +142,11 @@
         </profile>
     </profiles>
 
-    <!-- Distribution Management for Maven Central -->
+    <!-- Distribution Management for Sonatype Central -->
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>central</id>
+            <url>https://central.sonatype.com/api/v1/publisher</url>
         </repository>
     </distributionManagement>
 

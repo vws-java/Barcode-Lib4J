@@ -53,8 +53,8 @@ Add the dependency via [Maven Central](https://central.sonatype.com/artifact/de.
 ### &#9656;&#9656; Method 2: Manual Download
 Download the latest ZIP file with source code, precompiled JAR and JavaDocs from the [Official Product Website](https://www.vw-software.com/java-barcode-library/)
 
-### &#9656;&#9656; Recommended: Documentation & Examples
-Tutorial and examples: [Official Product Website](https://www.vw-software.com/java-barcode-library/)
+### &#9656;&#9656; RECOMMENDED: Tutorial & Examples
+Tutorial and examples: [Official Product Website](https://www.vw-software.com/java-barcode-library/)  (scroll down)
 
 <br>
 

@@ -7,7 +7,7 @@
 </p>
 <br>
 <div align="center">
-  <img width="180" height="124" src="https://github.com/user-attachments/assets/564e9ae4-2c5b-46a6-8aa1-a67788d966f5" alt="Supported Image Formats">
+  <img width="232" height="160" style="width:9.5625rem;height:6.5625rem" src="https://github.com/user-attachments/assets/564e9ae4-2c5b-46a6-8aa1-a67788d966f5" alt="Supported Image Formats">
 </div>
 
 ## Features

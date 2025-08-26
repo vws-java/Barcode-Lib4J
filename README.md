@@ -7,7 +7,7 @@
 </p>
 <br>
 <div align="center">
-  <img width="868" height="160" style="width:39.06rem;height:7.2rem" src="https://github.com/user-attachments/assets/fee89ebf-fbf7-4ed5-b22c-e2a7ca33356d" alt="Barcode-Lib4J - Key Features">
+  <img width="868" height="160" style="width:39.06rem;height:7.2rem" src="https://github.com/user-attachments/assets/23e4475f-3c24-4bf4-83c3-8b923ecbab07" alt="Barcode-Lib4J - Key Features">
 </div>
 
 ## Features

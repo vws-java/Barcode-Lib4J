@@ -10,7 +10,7 @@
   <img width="868" height="160" style="width:39.06rem;height:7.2rem" src="https://github.com/user-attachments/assets/23e4475f-3c24-4bf4-83c3-8b923ecbab07" alt="Barcode-Lib4J - Key Features">
 </div>
 
-## Features
+## Barcode-Lib4J &ndash; Features
 - Drawing and printing of 1D and 2D barcodes using Java2D (java.awt.Graphics2D)
 - Barcodes as **PDF**: Compliance with PDF/X-1a:2001 for color-accurate printing in CMYK as well as PDF/X-3:2002 for RGB colors
 - Barcodes as **EPS**: Supports both RGB and CMYK color models; Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter
@@ -29,7 +29,7 @@
 - **Comprehensive support for GS1-128, GS1 DataMatrix and GS1 QR Code:** Verification of data integrity such as correctness of application identifiers, length and format of individual data elements, verification/calculation of the check digit in SSCC and GTIN and more
 <br>
 
-## Supported Barcodes
+## Supported Barcode Formats
 
 | 1D Barcodes | 2D Barcodes |
 |-------------|-------------|
@@ -46,7 +46,7 @@
 - Optional: OpenPDF version 1.3.0 to 2.4.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used OpenPDF version is compatible with your Java version!
 <br>
 
-## Getting started
+## Getting Started
 ### &#9656;&#9656; Method 1: Maven Repository
 Add the dependency via [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j) - copy the snippet for Maven, Gradle, or your preferred build tool
 

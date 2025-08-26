@@ -10,6 +10,7 @@
   <img width="868" height="160" style="width:39.06rem;height:7.2rem" src="https://github.com/user-attachments/assets/23e4475f-3c24-4bf4-83c3-8b923ecbab07" alt="Barcode-Lib4J - Key Features">
 </div>
 <br>
+<br>
 
 ## Barcode-Lib4J &ndash; Features
 - Drawing and printing of 1D and 2D barcodes using Java2D (java.awt.Graphics2D)

@@ -3,7 +3,7 @@
 </div>
 <br>
 <p align="center">
-  <strong><em>Java library for creating, printing and storing 1D and 2D barcodes as vector (PDF, EPS, SVG) and raster (PNG, BMP, JPG) images. Proven in practice through use in our commercial software products.</em></strong>
+  <strong><em>Barcode-Lib4J &ndash; Java library for creating, printing and storing 1D and 2D barcodes as vector (PDF, EPS, SVG) and raster (PNG, BMP, JPG) images. Proven in practice through use in our commercial software products.</em></strong>
 </p>
 <br>
 <div align="center">
@@ -12,7 +12,7 @@
 <br>
 <br>
 
-## Barcode-Lib4J &ndash; Features
+## Features
 - Drawing and printing of 1D and 2D barcodes using Java2D (java.awt.Graphics2D)
 - Barcodes as **PDF**: Compliance with PDF/X-1a:2001 for color-accurate printing in CMYK as well as PDF/X-3:2002 for RGB colors
 - Barcodes as **EPS**: Supports both RGB and CMYK color models; Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter

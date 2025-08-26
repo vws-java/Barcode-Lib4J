@@ -32,7 +32,6 @@
 <br>
 
 ## Supported Barcode Formats
-
 | 1D Barcodes | 2D Barcodes
 |-------------|-------------
 | Code 128, Code 128 A, Code 128 B, Code 128 C | QR Code
@@ -44,7 +43,7 @@
 <br>
 
 ## Output Formats Overview
-| Format | Type | CMYK | RGB | Transparency Supported
+| Format | Type | CMYK colors | RGB colors | Transparency Supported
 |--------|---------------|------|-----|------------------------
 | **PDF** | Vector | ✓ | ✓ | ✓
 | **EPS** | Vector | ✓ | ✓ | ✓

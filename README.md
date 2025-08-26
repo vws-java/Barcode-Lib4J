@@ -42,7 +42,7 @@
 | SSCC-18 (NVE), PZN, PZN8, Codabar | Aztec
 <br>
 
-## Output Formats Overview
+## Image Output Formats
 | Format | Type | CMYK colors | RGB colors | Transparency supported
 |--------|---------------|------|-----|------------------------
 | **PDF** | Vector | ✓ | ✓ | ✓

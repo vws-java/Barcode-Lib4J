@@ -43,7 +43,7 @@
 <br>
 
 ## Output Formats Overview
-| Format | Type | CMYK colors | RGB colors | Transparency Supported
+| Format | Type | CMYK colors | RGB colors | Transparency supported
 |--------|---------------|------|-----|------------------------
 | **PDF** | Vector | ✓ | ✓ | ✓
 | **EPS** | Vector | ✓ | ✓ | ✓

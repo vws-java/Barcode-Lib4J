@@ -73,6 +73,7 @@ Download Sources, JavaDoc and a precompiled JAR directly from [Maven Repository]
 
 ### &#9656;&#9656; RECOMMENDED: Best Practices and Examples
 Learn best practices for reliable, scannable barcodes and avoid common pitfalls &ndash; essential tutorial and examples: [Official Barcode-Lib4J Website](https://www.vw-software.com/java-barcode-library/) (scroll down)
+
 <br>
 <br>
 

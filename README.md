@@ -71,7 +71,7 @@ Tutorial and examples: [Official Product Website](https://www.vw-software.com/ja
 <br>
 
 ## Credits
-2D barcodes are provided by some slightly modified classes from the [ZXing](https://github.com/zxing/zxing) project. A factory class has been added to it to support above features as well as GS1 versions of QR Code and DataMatrix.
+2D barcodes (QR Code, DataMatrix, PDF417 and Aztec) are provided by some slightly modified classes from the [ZXing](https://github.com/zxing/zxing) project. A factory class has been added to it to support above features as well as GS1 versions of QR Code and DataMatrix.
 
 
 

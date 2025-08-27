@@ -7,7 +7,6 @@
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 </div>
-<br>
 
 ## Proven Barcode Library for Java &ndash; now also available on GitHub & Maven
 **Barcode-Lib4J** is a mature and battle-tested Java library for drawing, printing and storing 1D and 2D barcodes as vector (PDF, EPS, SVG) and raster (PNG, BMP, JPG) images. Proven in practice in our commercial software products.

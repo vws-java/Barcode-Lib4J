@@ -45,12 +45,12 @@
 ## Image Output Formats
 | Format | Type | CMYK colors | RGB colors | Transparency support
 |--------|---------------|------|-----|------------------------
-| **PDF** | Vector | ✅ | ✅ | ✅
-| **EPS** | Vector | ✅ | ✅ | ✅
-| **SVG** | Vector | ❌ | ✅ | ✅
-| **PNG** | Raster | ❌ | ✅ | ✅
-| **BMP** | Raster | ❌ | ✅ | ❌
-| **JPG** | Raster | ❌ | ✅ | ❌
+| **PDF** | Vector | ✓ | ✓ | ✓
+| **EPS** | Vector | ✓ | ✓ | ✓
+| **SVG** | Vector | - | ✓ | ✓
+| **PNG** | Raster | - | ✓ | ✓
+| **BMP** | Raster | - | ✓ | -
+| **JPG** | Raster | - | ✓ | -
 <br>
 
 ## Requirements & Dependencies

@@ -14,7 +14,7 @@
 
 <br>
 <div align="center">
-  <img width="868" height="160" style="width:39.06rem;height:7.2rem" src="https://github.com/user-attachments/assets/f8ffb2a1-9b76-4aa1-8f00-79d5250db8e8" alt="Barcode-Lib4J - Core Features">
+  <img width="868" height="160" style="width:39.06rem;height:7.2rem" src="https://github.com/user-attachments/assets/3cd6ff94-9407-4928-b9fc-29f181e5545b" alt="Barcode-Lib4J - Core Features">
 </div>
 <br>
 <br>

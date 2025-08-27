@@ -3,7 +3,7 @@
 </div>
 <br>
 <p align="center">
-  <strong><em>Barcode-Lib4J &ndash; Java library for creating, printing and storing 1D and 2D barcodes as vector (PDF, EPS, SVG) and raster (PNG, BMP, JPG) images. Proven in practice through use in our commercial software products.</em></strong>
+  <strong><em>Barcode-Lib4J &ndash; Java library for drawing, printing and storing 1D and 2D barcodes as vector (PDF, EPS, SVG) and raster (PNG, BMP, JPG) images. Proven in practice through use in our commercial software products.</em></strong>
 </p>
 <br>
 <div align="center">
@@ -55,7 +55,7 @@
 
 ## Requirements & Dependencies
 - Minimum Java Version: 9
-- Optional: OpenPDF version 1.3.0 to 2.4.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used OpenPDF version is compatible with your Java version!
+- Optional: OpenPDF version 1.3.0 to 2.4.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used version is compatible with your Java version!
 <br>
 
 ## Getting Started

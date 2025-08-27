@@ -9,7 +9,7 @@
 </div>
 <br>
 <p align="center">
-  <strong><em>NEW to GitHub & Maven Central: BARCODE-LIB4J &ndash; Java library for drawing, printing and storing 1D and 2D barcodes as vector (PDF, EPS, SVG) and raster (PNG, BMP, JPG) images. Proven in practice through use in our commercial software products.</em></strong>
+  <strong><em>NEW to GitHub & Maven: BARCODE-LIB4J &ndash; Java library for drawing, printing and storing 1D and 2D barcodes as vector (PDF, EPS, SVG) and raster (PNG, BMP, JPG) images. Proven in practice through use in our commercial software products.</em></strong>
 </p>
 <br>
 <div align="center">

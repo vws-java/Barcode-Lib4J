@@ -105,7 +105,7 @@ public class QRCodeExample {
 ```
 <div align="center">
   <p><strong>Resulting QR Code:</strong></p>
-  <img width="567" height="567" style="width:40mm;height:40mm" src="https://github.com/user-attachments/assets/1916ab09-4004-4ef2-bc27-135263d3cc87" alt="QR Code Example">
+  <img width="567" height="567" style="width:40mm;height:40mm" src="https://github.com/user-attachments/assets/1916ab09-4004-4ef2-bc27-135263d3cc87" alt="Generated QR Code Example">
 </div>
 
 <br>

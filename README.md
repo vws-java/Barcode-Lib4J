@@ -28,7 +28,6 @@
 - High precision: Coordinates are stored with up to six decimal places in all supported vector formats
 - **Adjustment of bar widths to printer resolution (important for ensuring proper barcode quality at resolutions ≤ 600 dpi)**
 - Bar width reduction/correction (useful to account for ink spread in inkjet printers)
-- Barcodes include required minimum distances ("quiet zones") according to the respective specification
 - Customizable plain text line: font, size, spacing and editable content; Optional automatic font size adjustment; Additionally, the plain text line can be positioned at the top, bottom or completely hidden
 - Advanced setting: Customizable size of the barcode bars ("module size")
 - Option for transparent background (Supported in EPS, PDF, SVG and PNG)

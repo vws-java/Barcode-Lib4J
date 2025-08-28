@@ -74,7 +74,7 @@ Download Sources, JavaDoc and a precompiled JAR directly from [Maven Repository]
 ### &#9656;&#9656; RECOMMENDED: Best Practices & Examples
 Learn best practices for reliable, scannable barcodes and avoid common pitfalls &ndash; [Essential Tutorial & Examples](https://www.vw-software.com/java-barcode-library/#get-started)
 
-### &#9656;&#9656; Quick Start Example &ndash; QR Code to SVG file
+### &#9656;&#9656; Quick Start Example &ndash; Generating a QR Code as SVG and EPS (CMYK)
 ```java
 import java.awt.*;
 import java.io.*;
@@ -95,8 +95,10 @@ public class QRCodeExample {
     Graphics2D g2d = imageCreator.getGraphics2D();
     tdc.buildSymbol().draw(g2d, 0.0, 0.0, sizeMM, sizeMM);
 
-    try (FileOutputStream fos = new FileOutputStream("sample-qrcode.svg")) {
-      imageCreator.writeSVG(fos);
+    try (FileOutputStream svgOut = new FileOutputStream("sample-qrcode.svg");
+         FileOutputStream epsOut = new FileOutputStream("sample-qrcode.eps")) {
+      imageCreator.writeSVG(svgOut);
+      imageCreator.writeEPS(epsOut, ImageCreator.COLORSPACE_CMYK);
     }
   }
 }

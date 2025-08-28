@@ -75,6 +75,34 @@ Download Sources, JavaDoc and a precompiled JAR directly from [Maven Repository]
 ### &#9656;&#9656; RECOMMENDED: Best Practices & Examples
 Learn best practices for reliable, scannable barcodes and avoid common pitfalls &ndash; essential tutorial and examples: [Official Barcode-Lib4J Website](https://www.vw-software.com/java-barcode-library/) (scroll down)
 
+### &#9656;&#9656; Quick Start Example &ndash; QR Code to SVG file
+```java
+import java.awt.*;
+import java.io.*;
+import barcodelib4j.image.*;
+import barcodelib4j.twod.*;
+
+
+public class QRCodeExample {
+  public static void main(String[] args) throws Exception {
+
+    final double sizeMM = 40.0; // QR Code size: 40x40 millimeters
+
+    TwoDCode tdc = new TwoDCode();
+    tdc.setType(TwoDType.QRCODE);
+    tdc.setContent("Barcode-Lib4J Demo");
+
+    ImageCreator imageCreator = new ImageCreator(sizeMM, sizeMM);
+    Graphics2D g2d = imageCreator.getGraphics2D();
+    tdc.buildSymbol().draw(g2d, 0.0, 0.0, sizeMM, sizeMM);
+
+    try (FileOutputStream fos = new FileOutputStream("sample-qrcode.svg")) {
+      imageCreator.writeSVG(fos);
+    }
+  }
+}
+```
+
 <br>
 <br>
 

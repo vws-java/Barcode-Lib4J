@@ -21,7 +21,7 @@
 
 ## Features
 - Drawing and printing of 1D and 2D barcodes using Java2D (java.awt.Graphics2D)
-- Barcodes as **PDF**: Compliance with PDF/X-1a:2001 for color-accurate CMYK printing
+- Barcodes as **PDF**: Compliance with PDF/X-1a:2001 for color-accurate printing in CMYK as well as PDF/X-3:2002 for RGB colors
 - Barcodes as **EPS**: Supports both RGB and CMYK color models; Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter
 - Barcodes as **SVG**: This vector format inherently only supports the RGB color model
 - Barcodes as **PNG, BMP, JPG**: DPI resolution is stored in the file header, thereby preserving both the target resolution and the original dimensions of the graphic for later printing; No unwanted visual effects, such as aliasing, distortion or other artifacts

@@ -71,10 +71,10 @@ Add the dependency via [Maven Central](https://central.sonatype.com/artifact/de.
 ### &#9656;&#9656; Option 2: Manual Download
 Download Sources, JavaDoc and a precompiled JAR directly from [Maven Repository](https://repo1.maven.org/maven2/de/vwsoft/barcodelib4j/) &ndash; browse all versions
 
-### &#9656;&#9656; RECOMMENDED: Best Practices & Examples
+### RECOMMENDED: Best Practices & Examples
 Follow best practices for _reliable, scannable barcodes_ and avoid common pitfalls &ndash; including proper DPI handling for printing and raster image generation, RGB vs. CMYK color choice, and validation of Application Identifiers and data elements for GS1 barcodes (GS1-128, GS1 DataMatrix, GS1 QR Code) &ndash; in our [Essential Tutorial & Examples](https://www.vw-software.com/java-barcode-library/#get-started)
 
-### &#9656;&#9656; Quick Start Example &ndash; Generating a QR Code as SVG and EPS (CMYK)
+### Quick Start Example &ndash; Generating a QR Code as SVG and EPS (CMYK)
 ```java
 import java.awt.*;
 import java.io.*;

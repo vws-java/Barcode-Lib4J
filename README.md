@@ -69,7 +69,7 @@
 Add the dependency via [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j) &ndash; copy the snippet for Maven, Gradle, or your preferred build tool
 
 ### &#9656;&#9656; Option 2: Manual Download
-Download Sources, Javadoc and a precompiled JAR directly from [Maven Repository](https://repo1.maven.org/maven2/de/vwsoft/barcodelib4j/) &ndash; browse all versions
+Download Sources, Javadoc and a precompiled JAR directly from [GitHub Releases](https://github.com/vws-java/Barcode-Lib4J/releases)
 
 ### RECOMMENDED: Best Practices & Examples
 Follow best practices for _reliable, scannable barcodes_ and avoid common pitfalls &ndash; including proper DPI handling for printing and raster image generation, RGB vs. CMYK color choice, and validation of Application Identifiers and data elements for GS1 barcodes (GS1-128, GS1 DataMatrix, GS1 QR Code) &ndash; in our [Essential Tutorial & Examples](https://www.vw-software.com/java-barcode-library/#get-started)

@@ -66,7 +66,6 @@
 <br>
 
 ## Installation
-### Option 1: Add Dependency
 **Maven:**
 ```xml
 <dependency>
@@ -80,9 +79,7 @@
 implementation 'de.vwsoft:barcodelib4j:2.0.2'
 ```
 Other build tools and all versions: [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
-
-### Option 2: Manual Download
-Download Sources, Javadoc and a precompiled JAR directly from [Releases](https://github.com/vws-java/Barcode-Lib4J/releases)
+Download the sources, Javadoc, and a precompiled JAR directly from the [Releases](https://github.com/vws-java/Barcode-Lib4J/releases) page.
 
 <br>
 

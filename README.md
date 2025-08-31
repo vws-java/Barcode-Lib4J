@@ -21,6 +21,7 @@
 
 ## Features
 - Drawing and printing of 1D and 2D barcodes using Java2D (java.awt.Graphics2D)
+- Vector and raster image export with full support for format-specific features such as color models (CMYK, RGB), transparency, high coordinate precision, optional embedded preview (EPS), DPI handling, and PDF/X-compliant output for print-ready PDFs
 - **Adjustment of bar widths to printer resolution (important for ensuring proper barcode quality at resolutions ≤ 600 dpi)**
 - Bar width reduction/correction (useful to account for ink spread in inkjet printers)
 - Customizable plain text line: font, size, spacing and editable content; Optional automatic font size adjustment; Additionally, the plain text line can be positioned at the top, bottom or completely hidden

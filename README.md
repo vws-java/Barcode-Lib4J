@@ -64,13 +64,28 @@
 - Optional: OpenPDF version 1.3.0 to 2.4.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used version is compatible with your Java version!
 <br>
 
-## Getting Started
-### &#9656;&#9656; Option 1: Maven Central
-Add the dependency via [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j) &ndash; copy the snippet for Maven, Gradle, or your preferred build tool
+## Installation
+### Option 1: Add Dependency
+**Maven:**
+```xml
+<dependency>
+    <groupId>de.vwsoft</groupId>
+    <artifactId>barcodelib4j</artifactId>
+    <version>2.0.2</version>
+</dependency>
+```
+**Gradle:**
+```gradle
+implementation 'de.vwsoft:barcodelib4j:2.0.2'
+```
+Other build tools and all versions: [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
 
-### &#9656;&#9656; Option 2: Manual Download
+### Option 2: Manual Download
 Download Sources, Javadoc and a precompiled JAR directly from [Releases](https://github.com/vws-java/Barcode-Lib4J/releases)
 
+<br>
+
+## Getting Started
 ### RECOMMENDED: Best Practices & Examples
 Follow best practices for _reliable, scannable barcodes_ and avoid common pitfalls &ndash; including proper DPI handling for printing and raster image generation, RGB vs. CMYK color choice, and validation of Application Identifiers and data elements for GS1 barcodes (GS1-128, GS1 DataMatrix, GS1 QR Code) &ndash; in our [Essential Tutorial & Examples](https://www.vw-software.com/java-barcode-library/#get-started)
 

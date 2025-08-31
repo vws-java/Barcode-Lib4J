@@ -62,7 +62,7 @@
 
 ## Requirements & Dependencies
 - Minimum Java Version: 9
-- Optional: OpenPDF version 1.3.0 to 2.4.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used version is compatible with your Java version! Also note that OpenPDF version 3.0.0 and higher is **not compatible** with Barcode-Lib4J.
+- Optional: OpenPDF version 1.3.0 to 2.4.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used version is compatible with your Java version! Also note that version 3.0.0 and higher is **not compatible** with Barcode-Lib4J.
 <br>
 
 ## Installation

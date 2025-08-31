@@ -93,8 +93,8 @@ Follow best practices for _reliable, scannable barcodes_ and avoid common pitfal
 ```java
 import java.awt.*;
 import java.io.*;
-import barcodelib4j.image.*;
-import barcodelib4j.twod.*;
+import de.vwsoft.barcodelib4j.image.*;
+import de.vwsoft.barcodelib4j.twod.*;
 
 
 public class QRCodeExample {

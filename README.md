@@ -40,8 +40,8 @@
 | **PNG** | Raster | - | ✓ | ✓
 | **BMP** | Raster | - | ✓ | -
 | **JPG** | Raster | - | ✓ | -
-- Barcodes as **PDF**: Compliance with PDF/X-1a:2001 for color-accurate printing in CMYK as well as PDF/X-3:2002 for RGB colors
-- Barcodes as **EPS**: Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter
+- **PDF**: Compliance with PDF/X-1a:2001 for color-accurate printing in CMYK as well as PDF/X-3:2002 for RGB colors
+- **EPS**: Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter
 - **PDF, EPS, SVG**: Coordinates are stored with up to six decimal places for high precision
 - **PNG, BMP, JPG**: DPI resolution is stored in the file header, thereby preserving both the target resolution and the original dimensions of the graphic for later printing; No aliasing, distortion or other unwanted artifacts
 <br>

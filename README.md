@@ -43,9 +43,9 @@
 | Code 128, Code 128 A, Code 128 B, Code 128 C | QR Code
 | 2 of 5 Interleaved, Code 39, Code 39 Extended | GS1 QR Code
 | GS1-128 (EAN-128), GTIN-13 (EAN-13), GTIN-8 (EAN-8) | DataMatrix
-| UPC-A, ISBN-13, ISMN | GS1 DataMatrix
+| UPC-A, UPC-E, ISBN-13, ISMN | GS1 DataMatrix
 | Code 93, Code 93 Extended, GTIN-14 (EAN-14) | PDF417
-| SSCC-18 (NVE), PZN, PZN8, Codabar | Aztec
+| SSCC-18 (NVE), PZN, PZN8, Codabar, Code 11 | Aztec
 <br>
 
 ## Image Output Formats

@@ -122,10 +122,5 @@ public class QRCodeExample {
 <br>
 <br>
 
-## Contributing
-Use [Issues](../../issues) and [Pull Requests](../../pulls) to send your contributions. ⭐ Star us on GitHub to support further development!
-
-<br>
-
 ## Credits
 All 2D barcodes (QR Code, DataMatrix, PDF417 and Aztec) are provided by some slightly modified and seamlessly integrated classes from the [ZXing](https://github.com/zxing/zxing) project. A factory class has been added to it to support above features as well as GS1 versions of QR Code and DataMatrix.

@@ -84,7 +84,7 @@ implementation 'de.vwsoft:barcodelib4j:2.0.2'
 
 ## Getting Started
 ### RECOMMENDED: Best Practices & Examples
-Follow best practices for _reliable, scannable barcodes_ and avoid common pitfalls &ndash; including proper DPI handling for printing and raster image generation, RGB vs. CMYK color choice, and validation of Application Identifiers and data elements for GS1 barcodes (GS1-128, GS1 DataMatrix, GS1 QR Code) &ndash; in our [Essential Tutorial & Examples](https://www.vw-software.com/java-barcode-library/#get-started)
+Follow best practices for **reliable, scannable barcodes** and avoid common pitfalls &ndash; including proper DPI handling for printing and raster image generation, RGB vs. CMYK color choice, and validation of Application Identifiers and data elements for GS1 barcodes (GS1-128, GS1 DataMatrix, GS1 QR Code) &ndash; in our [Essential Tutorial & Examples](https://www.vw-software.com/java-barcode-library/#get-started)
 
 ### Quick Start Example &ndash; Generating a QR Code as SVG and EPS (CMYK)
 ```java

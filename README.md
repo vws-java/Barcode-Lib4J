@@ -96,11 +96,9 @@ import de.vwsoft.barcodelib4j.twod.*;
 
 public class QRCodeExample {
   public static void main(String[] args) throws Exception {
-
     final double sizeMM = 40.0; // QR Code size: 40x40 millimeters
 
-    TwoDCode tdc = new TwoDCode();
-    tdc.setType(TwoDType.QRCODE);
+    TwoDCode tdc = new TwoDCode(); // QR Code is the default 2D code type
     tdc.setContent("Barcode-Lib4J Demo");
 
     ImageCreator imageCreator = new ImageCreator(sizeMM, sizeMM);

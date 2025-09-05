@@ -31,6 +31,7 @@
 - Configurable bar width ratio from 2:1 to 3:1 for barcode types that support this feature: Interleaved 2 of 5, Code 39 and others
 - Add-Ons 2 or 5 for the barcode types EAN-13, EAN-8, UPC-A, UPC-E, ISBN-13 and ISMN; second plain text line for ISBN-13 and ISMN
 - **Comprehensive support for GS1-128, GS1 DataMatrix and GS1 QR Code:** Verification of data integrity such as correctness of application identifiers, length and format of individual data elements, verification/calculation of the check digit in SSCC and GTIN and more
+- Lightweight architecture: Compiles to a single small JAR file (~300KB); Has only one dependency (OpenPDF for PDF export), fully optional at compile and runtime
 <br>
 
 ## Image Output Formats

@@ -34,14 +34,14 @@
 <br>
 
 ## Image Output Formats
-| Format | Type | CMYK colors | RGB colors | Transparency support
-|--------|---------------|------|-----|------------------------
-| **PDF** | Vector | ✓ | ✓ | ✓
-| **EPS** | Vector | ✓ | ✓ | ✓
-| **SVG** | Vector | - | ✓ | ✓
-| **PNG** | Raster | - | ✓ | ✓
-| **BMP** | Raster | - | ✓ | -
-| **JPG** | Raster | - | ✓ | -
+| Format | Type | CMYK colors | RGB colors | Transparency support |
+|--------|---------------|------|-----|---------------------------|
+| **PDF** | Vector | ✓ | ✓ | ✓ |
+| **EPS** | Vector | ✓ | ✓ | ✓ |
+| **SVG** | Vector | - | ✓ | ✓ |
+| **PNG** | Raster | - | ✓ | ✓ |
+| **BMP** | Raster | - | ✓ | - |
+| **JPG** | Raster | - | ✓ | - |
 - **PDF**: Compliance with PDF/X-1a:2001 for color-accurate printing in CMYK as well as PDF/X-3:2002 for RGB colors
 - **EPS**: Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter
 - **PDF, EPS, SVG**: Coordinates are stored with up to six decimal places for high precision
@@ -49,14 +49,14 @@
 <br>
 
 ## Supported Barcode Formats
-| 1D Barcodes | 2D Barcodes
-|-------------|-------------
-| Code 128, Code 128 A, Code 128 B, Code 128 C | QR Code
-| 2 of 5 Interleaved, Code 39, Code 39 Extended | GS1 QR Code
-| GS1-128 (EAN-128), GTIN-13 (EAN-13), GTIN-8 (EAN-8) | DataMatrix
-| UPC-A, UPC-E, ISBN-13, ISMN | GS1 DataMatrix
-| Code 93, Code 93 Extended, GTIN-14 (EAN-14) | PDF417
-| SSCC-18 (NVE), PZN, PZN8, Codabar, Code 11 | Aztec
+| 1D Barcodes | 2D Barcodes |
+|-------------|-------------|
+| Code 128, Code 128 A, Code 128 B, Code 128 C | QR Code |
+| 2 of 5 Interleaved, Code 39, Code 39 Extended | GS1 QR Code |
+| GS1-128 (EAN-128), GTIN-13 (EAN-13), GTIN-8 (EAN-8) | DataMatrix |
+| UPC-A, UPC-E, ISBN-13, ISMN | GS1 DataMatrix |
+| Code 93, Code 93 Extended, GTIN-14 (EAN-14) | PDF417 |
+| SSCC-18 (NVE), PZN, PZN8, Codabar, Code 11 | Aztec |
 <br>
 
 ## Requirements & Dependencies
@@ -77,8 +77,8 @@
 ```gradle
 implementation 'de.vwsoft:barcodelib4j:2.0.2'
 ```
-- Other build tools and all versions: [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
-- Direct download of the sources, Javadoc, and a precompiled JAR: [Releases](https://github.com/vws-java/Barcode-Lib4J/releases)
+- Add the dependency to other build tools and/or browse all versions: [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
+- Directly download Java sources, Javadoc, and a precompiled JAR: [GitHub Releases](https://github.com/vws-java/Barcode-Lib4J/releases)
 
 <br>
 

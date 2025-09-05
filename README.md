@@ -77,6 +77,7 @@
 ```gradle
 implementation 'de.vwsoft:barcodelib4j:2.0.2'
 ```
+**Alternative methods:**
 - Add the dependency to other build tools and/or browse all versions: [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
 - Directly download Java sources, Javadoc, and a precompiled JAR: [GitHub Releases](https://github.com/vws-java/Barcode-Lib4J/releases)
 

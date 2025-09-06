@@ -1,3 +1,4 @@
+<h1 align="center">Barcode-Lib4J &nbsp;&ndash;&nbsp; Java API</h1>
 <div align="center">
   <img width="500" height="110" src="https://github.com/user-attachments/assets/ec774370-63be-4db3-9cb4-e6561918a807" alt="Barcode-Lib4J Logo">
 

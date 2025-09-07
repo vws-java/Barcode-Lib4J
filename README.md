@@ -128,3 +128,6 @@ public class QRCodeExample {
 
 ## Credits
 All 2D barcodes (QR Code, DataMatrix, PDF417, and Aztec) are provided by some slightly modified and seamlessly integrated Java classes from the [ZXing](https://github.com/zxing/zxing) barcode library. A factory class has been added to support the above features as well as GS1 versions of QR Code and DataMatrix.
+
+## Contributing
+We are currently working independently on the next major version 3.0.0, therefore we are not accepting pull requests at this time. If you have questions or suggestions, please feel free to open an [Issue](../../issues).

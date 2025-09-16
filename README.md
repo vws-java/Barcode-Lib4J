@@ -30,7 +30,7 @@
 - Bar width reduction/correction (useful to account for ink spread in inkjet printers)
 - Customizable plain text line: font, size, spacing and editable content; Optional automatic font size adjustment; Additionally, the plain text line can be positioned at the top, bottom or completely hidden
 - Advanced setting: Customizable size of the barcode bars ("module size")
-- Rotation in 90-degree increments
+- Rotation in 90-degree increments, taking into account the horizontal and vertical resolution of the target medium
 - Configurable bar width ratio from 2:1 to 3:1 for barcode types that support this feature: Interleaved 2 of 5, Code 39 and others
 - Add-Ons 2 or 5 for the barcode types EAN-13, EAN-8, UPC-A, UPC-E, ISBN-13 and ISMN; second plain text line for ISBN-13 and ISMN
 - **Comprehensive support for GS1-128, GS1 DataMatrix and GS1 QR Code:** Verification of data integrity such as correctness of application identifiers, length and format of individual data elements, verification/calculation of the check digit in SSCC and GTIN and more

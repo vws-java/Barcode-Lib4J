@@ -58,6 +58,8 @@
 | Code 93, Code 93 Extended, GTIN-14 (EAN-14) | PDF417 |
 | SSCC-18 (NVE), PZN, PZN8, Codabar, Code 11 | Aztec |
 
+<br>
+
 ## Required Java Version & Dependencies
 - Minimum Java Version: 11
 - Optional: [OpenPDF](https://github.com/LibrePDF/OpenPDF) version 1.3.0 to 3.0.0 is needed for PDF export - Please ensure the used version is compatible with your Java version!

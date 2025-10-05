@@ -60,11 +60,11 @@
 
 ## Required Java Version & Dependencies
 - Minimum Java Version: 11
-- Optional: OpenPDF version 1.3.0 to 3.0.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used version is compatible with your Java version!
+- Optional: [OpenPDF](https://github.com/LibrePDF/OpenPDF) version 1.3.0 to 3.0.0 is needed for PDF export - Please ensure the used version is compatible with your Java version!
 <br>
 
 ## Get Started
-Find this on the official Barcode-Lib4J project site: &nbsp; [ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)
+Find this on the official Barcode-Lib4J project site: &nbsp; <b>[ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)</b>
 
 - 📦 **Installation Guide** - Maven and Gradle dependency snippets
 - 🧑‍💻 **Quick Start Examples** - For 1D and 2D barcodes in RGB & CMYK, vector & raster

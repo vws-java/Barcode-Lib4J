@@ -33,7 +33,6 @@
 - Configurable bar width ratio from 2:1 to 3:1 for barcode types that support this feature: Interleaved 2 of 5, Code 39 and others
 - Add-Ons 2 or 5 for the barcode types EAN-13, EAN-8, UPC-A, UPC-E, ISBN-13 and ISMN; second plain text line for ISBN-13 and ISMN
 - **Comprehensive support for GS1-128, GS1 DataMatrix and GS1 QR Code:** Verification of data integrity such as correctness of application identifiers, length and format of individual data elements, verification/calculation of the check digit in SSCC and GTIN and more
-<br>
 
 ## Image Output Formats
 | Format | Type | CMYK colors | RGB colors | Transparency support |
@@ -48,7 +47,6 @@
 - **EPS**: Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter
 - **PDF, EPS, SVG**: Coordinates are stored with up to six decimal places for high precision
 - **PNG, BMP, JPG**: DPI resolution is stored in the file header, thereby preserving both the target resolution and the original dimensions of the graphic for later printing; No aliasing, distortion or other unwanted artifacts
-<br>
 
 ## Supported Barcode Formats
 | 1D Barcodes | 2D Barcodes |
@@ -59,7 +57,6 @@
 | UPC-A, UPC-E, ISBN-13, ISMN | GS1 DataMatrix |
 | Code 93, Code 93 Extended, GTIN-14 (EAN-14) | PDF417 |
 | SSCC-18 (NVE), PZN, PZN8, Codabar, Code 11 | Aztec |
-<br>
 
 ## Required Java Version & Dependencies
 - Minimum Java Version: 11

@@ -22,39 +22,29 @@ package de.vwsoft.barcodelib4j.twod;
 /**
  * Enumeration of all supported 2D code types.
  * <p>
- * Each 2D code type has a unique integer ID which can optionally be used for efficient storage in a
- * file or database (e.g. as a byte type). See {@link #getID()} and {@link #valueOf(int id)}.
+ * Each 2D code type has a unique integer ID which can be used for efficient storage in a file or
+ * database. The IDs are small positive integers that can be safely cast to byte if needed.
+ * See {@link #getID()} and {@link #valueOf(int id)}.
  */
 public enum TwoDType {
 
-  /** Code type "QR Code"        */
-  QRCODE          ("QR Code",         1),
-
-  /** Code type "DataMatrix"     */
-  DATAMATRIX      ("DataMatrix",      2),
-
-  /** Code type "PDF 417"        */
-  PDF417          ("PDF 417",         3),
-
-  /** Code type "Aztec"          */
-  AZTEC           ("Aztec",           4),
-
-  /** Code type "GS1 QR Code"    */
-  GS1_QRCODE      ("GS1 QR Code",     5),
-
-  /** Code type "GS1 DataMatrix" */
-  GS1_DATAMATRIX  ("GS1 DataMatrix",  6);
-
-
+  /** Code type "QR Code"        */  QRCODE         ("QR Code",        1, 4),
+  /** Code type "DataMatrix"     */  DATAMATRIX     ("DataMatrix",     2, 1),
+  /** Code type "PDF 417"        */  PDF417         ("PDF 417",        3, 2),
+  /** Code type "Aztec"          */  AZTEC          ("Aztec",          4, 0),
+  /** Code type "GS1 QR Code"    */  GS1_QRCODE     ("GS1 QR Code",    5, 4),
+  /** Code type "GS1 DataMatrix" */  GS1_DATAMATRIX ("GS1 DataMatrix", 6, 1);
 
   private final String myTypeName;
   private final int myID;
+  private final int myDefaultQuietZone;
 
 
 
-  private TwoDType(String typeName, int id) {
+  private TwoDType(String typeName, int id, int defaultQuietZone) {
     myTypeName = typeName;
     myID = id;
+    myDefaultQuietZone = defaultQuietZone;
   }
 
 
@@ -87,6 +77,7 @@ public enum TwoDType {
 
   /**
    * Convenience method that returns whether this enum constant represents a GS1 code type.
+   * <p>
    * It is a shortcut for:
    * <pre>    foo == TwoDType.GS1_QRCODE || foo == TwoDType.GS1_DATAMATRIX</pre>
    *
@@ -94,6 +85,26 @@ public enum TwoDType {
    */
   public boolean isGS1() {
     return this == GS1_QRCODE || this == GS1_DATAMATRIX;
+  }
+
+
+
+  /**
+   * Returns the default quiet zone size for this 2D code type as specified in its respective
+   * specification.
+   * <p>
+   * The quiet zone is the blank space around the 2D code that prevents interference of the code
+   * by surrounding elements that may cause misreading. The size is specified in modules, where a
+   * module is the smallest single element in a 2D code.
+   * <p>
+   * Note: For QR Codes, the specification defines a minimum quiet zone size of 4 modules. However,
+   * in modern applications this value is often reduced and may vary depending on the specific use
+   * case or implementation requirements.
+   *
+   * @return the default quiet zone size in modules
+   */
+  public int getDefaultQuietZone() {
+    return myDefaultQuietZone;
   }
 
 
@@ -108,7 +119,9 @@ public enum TwoDType {
 
 
   /**
-   * {@return the name of this 2D code type} Equivalent to {@link #getTypeName()}.
+   * {@return the name of this 2D code type}
+   * <p>
+   * Equivalent to {@link #getTypeName()}.
    */
   @Override
   public String toString() {

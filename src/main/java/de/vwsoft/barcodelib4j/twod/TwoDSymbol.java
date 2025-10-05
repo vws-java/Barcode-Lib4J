@@ -25,50 +25,46 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 /**
- * Drawable 2D code symbol.
+ * Drawable 2D code symbol that uses Graphics2D for rendering.
  * <p>
  * Instances can be obtained by calling the {@link TwoDCode#buildSymbol buildSymbol} method of the
- * {@link TwoDCode} class.
- * <p>
- * (Alternatively, you can use the built-in ZXing library directly to obtain a {@code BitMatrix},
- * which is required to create instances of this class. Please note that some 2D code
- * implementations in the ZXing library may not support the {@code EncodeHintType.MARGIN} hint,
- * resulting in no quiet zones appended to the resulting {@code BitMatrix}. In contrast, other
- * implementations may have this property set to an unwanted default value. To work around this, you
- * can generally set the {@code MARGIN} hint to zero and instead use the quiet zone parameter in the
- * constructor of this class to append the needed quiet zone.)
+ * {@code TwoDCode} class.
  */
 public class TwoDSymbol {
 
   // Former bits of the BitMatrix, grouped into contiguous rectangles.
-  private Rectangle[] myChunks;
+  private final Rectangle[] myChunks;
 
   // Width and height of the 2D code symbol (in bits), including its quiet zones.
-  private Dimension mySize;
+  private final Dimension mySize;
 
 
 
   /**
    * Constructs an instance using the binary representation (bit matrix) of a 2D code.
    * <p>
-   * A <b>quiet zone</b>, measured in modules (individual elements of the code), determines the
-   * width of the blank space around the code. It's important to set an appropriate quiet zone to
-   * ensure proper scanning and decoding of the symbol. The required minimum values for the quiet
-   * zone are available for all supported 2D code types in the
-   * {@link TwoDCode#ALL_QUIET_ZONES} array.
+   * For an explanation of what quiet zones are and the default quiet zone sizes for each 2D code
+   * type, see {@link TwoDType#getDefaultQuietZone()}.
    *
    * @param bitMatrix      the binary representation of the 2D code
    * @param quietZoneSize  the size of the quiet zone to be appended around the 2D code
+   * @throws NullPointerException      if the provided bit matrix is {@code null}
+   * @throws IllegalArgumentException  if the specified quiet zone size is negative
    */
   public TwoDSymbol(BitMatrix bitMatrix, int quietZoneSize) {
+    Objects.requireNonNull(bitMatrix, "BitMatrix cannot be null");
+    if (quietZoneSize < 0)
+      throw new IllegalArgumentException("Quiet zone size cannot be negative: " + quietZoneSize);
+
     final int matrixWidth  = bitMatrix.getWidth();
     final int matrixHeight = bitMatrix.getHeight();
     final ArrayList<Rectangle> chunks = new ArrayList<>(matrixWidth * matrixHeight / 3);
 
-    // horizontal chunks
+    // Horizontal chunks
     for (int j=0; j<matrixHeight; j++) {
       int positionCounter = quietZoneSize, widthCounter = 0;
       boolean barOrSpace = bitMatrix.get(0, j);
@@ -89,7 +85,7 @@ public class TwoDSymbol {
         chunks.add(new Rectangle(positionCounter, j + quietZoneSize, widthCounter, 1));
     }
 
-    // vertical chunks, this time without detection of 1x1-sized chunks (see "heightCounter > 1")
+    // Vertical chunks, this time without detection of 1x1-sized chunks (see "heightCounter > 1")
     for (int j=0; j<matrixWidth; j++) {
       int positionCounter = quietZoneSize, heightCounter = 0;
       boolean barOrSpace = bitMatrix.get(j, 0);
@@ -110,7 +106,7 @@ public class TwoDSymbol {
         chunks.add(new Rectangle(j + quietZoneSize, positionCounter, 1, heightCounter));
     }
 
-    myChunks = chunks.toArray(new Rectangle[chunks.size()]);
+    myChunks = chunks.toArray(Rectangle[]::new);
     quietZoneSize <<= 1;
     mySize = new Dimension(matrixWidth + quietZoneSize, matrixHeight + quietZoneSize);
   }

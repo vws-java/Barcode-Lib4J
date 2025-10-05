@@ -21,11 +21,9 @@ package de.vwsoft.barcodelib4j.twod;
 import de.vwsoft.barcodelib4j.twod.aztec.AztecWriter;
 import de.vwsoft.barcodelib4j.twod.datamatrix.DataMatrixWriter;
 import de.vwsoft.barcodelib4j.twod.datamatrix.Dimension;
-import de.vwsoft.barcodelib4j.twod.datamatrix.SymbolInfo;
 import de.vwsoft.barcodelib4j.twod.datamatrix.SymbolShapeHint;
 import de.vwsoft.barcodelib4j.twod.pdf417.Dimensions;
 import de.vwsoft.barcodelib4j.twod.pdf417.PDF417Writer;
-import de.vwsoft.barcodelib4j.twod.qrcode.ErrorCorrectionLevel;
 import de.vwsoft.barcodelib4j.twod.qrcode.QRCodeWriter;
 import de.vwsoft.barcodelib4j.twod.zxing.BarcodeFormat;
 import de.vwsoft.barcodelib4j.twod.zxing.BitMatrix;
@@ -36,18 +34,13 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
- * Main class of the package and a wrapper for the integrated ZXing classes.
- * <p>
- * The class provides methods and constants that facilitate the integration of 2D codes into an
- * existing application. It accepts settings in a type-safe form and validates them, catching any
- * errors beforehand. This reduces the number of possible exceptions that can be thrown during code
- * generation and helps to locate and handle them in a more differentiated way.
+ * Main class of the package for creating and configuring 2D codes.
  * <p>
  * <b>Usage:</b>
  * <ol>
@@ -60,15 +53,14 @@ import java.util.Map;
  * <b>Example:</b>
  * <pre>
  *     // Step 1: Common settings
- *     TwoDCode tdc = new TwoDCode();
- *     tdc.setType(TwoDType.QRCODE);
- *     tdc.setContent("Some content");
- *     tdc.setCharset(null); // include no ECI
- *     tdc.setQuietZoneSize(TwoDCode.ALL_QUIET_ZONES.get(TwoDType.QRCODE));
+ *     TwoDCode tdc = new TwoDCode(TwoDType.QRCODE);
+ *     tdc.setContent("Hello World!");
+ *     tdc.setCharset(null); // null = ISO 8859-1, includes no ECI
+ *     tdc.setQuietZone(TwoDType.QRCODE.getDefaultQuietZone());
  *
  *     // Step 2: Type-specific settings
- *     tdc.setQRCodeVersion(TwoDCode.QRCODE_VERSION_AUTO);
- *     tdc.setQRCodeErrCorr(1);
+ *     tdc.setQRCodeVersion(QRCodeVersion.AUTO);
+ *     tdc.setQRCodeErrCorr(QRCodeErrorCorrection.M);
  *
  *     // Step 3 and 4: Generate drawable symbol
  *     TwoDSymbol symbol = null;
@@ -80,167 +72,30 @@ import java.util.Map;
  *       }
  *     }
  * </pre>
- * When generating GS1 DataMatrix or GS1 QR Code, the {@link de.vwsoft.barcodelib4j.oned.GS1Validator}
- * class from the "oned" package can be used to perform advanced content validation. See the
- * {@link #setContent(String) setContent} method description for more information.
  */
 public class TwoDCode implements Cloneable {
 
-  // Common constants
-
-  /** Map containing the minimum quiet zones for all supported 2D code types, according to
-      their respective specifications, specified in modules. */
-  public static final Map<TwoDType,Integer> ALL_QUIET_ZONES = new HashMap<>(6);
-  static {
-    ALL_QUIET_ZONES.put(TwoDType.QRCODE,          4);
-    ALL_QUIET_ZONES.put(TwoDType.DATAMATRIX,      1);
-    ALL_QUIET_ZONES.put(TwoDType.PDF417,          2);
-    ALL_QUIET_ZONES.put(TwoDType.AZTEC,           0);
-    ALL_QUIET_ZONES.put(TwoDType.GS1_QRCODE,      4);
-    ALL_QUIET_ZONES.put(TwoDType.GS1_DATAMATRIX,  1);
-  }
-
-
-
-  // QR Code constants
-
-  /** Minimum (smallest) version of QR Code {@code (21x21)} according to specification;
-      value: 1. */
-  public static final int QRCODE_VERSION_MIN  =  1;
-
-  /** Maximum (largest) version of QR Code {@code (177x177)} according to specification;
-      value: 40. */
-  public static final int QRCODE_VERSION_MAX  = 40;
-
-  /** Selects the smallest possible QR Code version capable of encoding the content. */
-  public static final int QRCODE_VERSION_AUTO =  0;
-
-  /** Lowest QR Code error correction level ("L"); value: 0. */
-  public static final int QRCODE_ERR_CORR_MIN =  0;
-
-  /** Highest QR Code error correction level ("H"); value: 3. */
-  public static final int QRCODE_ERR_CORR_MAX =  3;
-
-  /** Array of all QR Code sizes ranging from version 1 to 40, as defined in the specification.
-      All QR Code symbol shapes are square, hence width equals height. */
-  public static final TwoDSize[] QRCODE_SIZES = new TwoDSize[40];
-  static {
-    for (int i=39; i>=0; i--) {
-      int size = 21 + 4 * i; // Formula for calculating QR Code size based on version
-      QRCODE_SIZES[i] = new TwoDSize(size, size);
-    }
-  }
-
-
-
-  // DataMatrix constants
-
-  /** Smallest size of DataMatrix {@code (10x10)} according to ECC200 specification; value: 1. */
-  public static final int DATAMATRIX_SIZE_MIN  =  1;
-
-  /** Largest size of DataMatrix {@code (144x144)} according to ECC200 specification; value: 30. */
-  public static final int DATAMATRIX_SIZE_MAX  = 30;
-
-  /** Selects the smallest possible DataMatrix size capable of encoding the content. */
-  public static final int DATAMATRIX_SIZE_AUTO =  0;
-
-  /** When selected automatically, the smallest size with no priority for the shape is chosen. */
-  public static final int DATAMATRIX_SHAPE_AUTO      = 0;
-
-  /** When selected automatically, the smallest size with a SQUARE shape is chosen. */
-  public static final int DATAMATRIX_SHAPE_SQUARE    = 1;
-
-  /** When selected automatically, the smallest size with a RECTANGLE shape is chosen. */
-  public static final int DATAMATRIX_SHAPE_RECTANGLE = 2;
-
-  /** Array containing all 30 DataMatrix sizes, ranging from {@code 10x10} to {@code 144x144}.
-      The sizes are sorted by width and height and include 24 square and 6 rectangular sizes. */
-  public static final TwoDSize[] DATAMATRIX_SIZES = new TwoDSize[SymbolInfo.PROD_SYMBOLS.length];
-  static {
-    SymbolInfo[] si = SymbolInfo.PROD_SYMBOLS;
-    for (int i=si.length-1; i>=0; i--)
-      DATAMATRIX_SIZES[i] = new TwoDSize(si[i].getSymbolWidth(), si[i].getSymbolHeight());
-    Arrays.sort(DATAMATRIX_SIZES);
-  }
-
-
-
-  // PDF417 constants
-
-  /** Minimum number of rows in a valid PDF417 symbol; value: 3. */
-  public static final int PDF417_ROWS_MIN  =  3;
-
-  /** Maximum number of rows in a valid PDF417 symbol; value: 90. */
-  public static final int PDF417_ROWS_MAX  = 90;
-
-  /** Minimum number of columns (code words) in a valid PDF417 symbol; value: 1. */
-  public static final int PDF417_COLUMNS_MIN  =  1;
-
-  /** Maximum number of columns (code words) in a valid PDF417 symbol; value: 30. */
-  public static final int PDF417_COLUMNS_MAX  = 30;
-
-  /** Lowest PDF417 error correction level; value: 0. */
-  public static final int PDF417_ERR_CORR_MIN =  0;
-
-  /** Highest PDF417 error correction level; value: 8. */
-  public static final int PDF417_ERR_CORR_MAX =  8;
-
-
-
-  // Aztec constants
-
-  /** Selects the smallest possible Aztec size capable of encoding the content. */
-  public static final int AZTEC_SIZE_AUTO =  0;
-
-  /** Minimum Aztec error correction level in percent; value: 5. */
-  public static final int AZTEC_ERR_CORR_MIN =  5;
-
-  /** Maximum Aztec error correction level in percent; value: 95. */
-  public static final int AZTEC_ERR_CORR_MAX = 95;
-
-  /** Array of all 4 Aztec compact sizes: {@code 15x15}, {@code 19x19}, {@code 23x23},
-      {@code 27x27}. All Aztec symbol shapes are square, hence width equals height. */
-  public static final TwoDSize[] AZTEC_SIZES_COMPACT = new TwoDSize[] {
-      new TwoDSize(15, 15), new TwoDSize(19, 19), new TwoDSize(23, 23), new TwoDSize(27, 27) };
-
-  /** Array of all 32 Aztec normal sizes, ranging from {@code 19x19} to {@code 151x151}.
-      All Aztec symbol shapes are square, hence width equals height. */
-  public static final TwoDSize[] AZTEC_SIZES_NORMAL = new TwoDSize[32];
-  static {
-    int k = 19;
-    for (int i=0; i!=32; i++) {
-      if (i == 4 || i == 11 || i == 19 || i == 26)
-        k += 2;
-      int size = k + i * 4;
-      AZTEC_SIZES_NORMAL[i] = new TwoDSize(size, size);
-    }
-  }
-
-
-
-  // Default settings
-
   // Common properties
-  private TwoDType pType     = TwoDType.QRCODE;
-  private String pContent    = "ABCD... 01234";
-  private Charset pCharset   = null;             // null = "ISO 8859-1", no ECI
-  private int pQuietZoneSize = 1;                // Size in modules
+  private TwoDType myType     = TwoDType.QRCODE;
+  private String myContent    = "ABCD... 01234";
+  private Charset myCharset   = null;             // null = ISO 8859-1, no ECI is included
+  private int myQuietZoneSize = 1;                // Size in modules
 
   // QR Code properties
-  private int pQRVersion = QRCODE_VERSION_AUTO;  // Automatically selected (fit to content)
-  private int pQRErrCorr = 1;                    // Error correction level set to "M"
+  private QRCodeVersion myQRVersion = QRCodeVersion.AUTO;
+  private QRCodeErrorCorrection myQRErrCorr = QRCodeErrorCorrection.M;
 
   // DataMatrix properties
-  private int pDMSize  = DATAMATRIX_SIZE_AUTO;   // Automatically selected (fit to content)
-  private int pDMShape = DATAMATRIX_SHAPE_AUTO;  // Automatically selected
+  private DataMatrixSize myDMSize = DataMatrixSize.AUTO;
+  private DataMatrixShape myDMShape = DataMatrixShape.AUTO;
 
   // PDF417 properties
-  private TwoDSize pPDSize = new TwoDSize(0, 0); // Automatically fit to content in both dimensions
-  private int pPDErrCorr   = 2;                  // Error correction level set to 2
+  private PDF417Size myPDSize = new PDF417Size(0, 0);
+  private PDF417ErrorCorrection myPDErrCorr = PDF417ErrorCorrection.EC2;
 
   // Aztec properties
-  private int pAZSize    = AZTEC_SIZE_AUTO;      // Automatically selected (fit to content)
-  private int pAZErrCorr = 23;                   // Recommended minimum error correction level in %
+  private AztecSize myAZSize = AztecSize.AUTO;
+  private int myAZErrCorr = 23;
 
 
 
@@ -249,19 +104,19 @@ public class TwoDCode implements Cloneable {
    * <ul>
    * <li>Code type: {@link TwoDType#QRCODE}</li>
    * <li>Content: "ABCD... 01234"</li>
-   * <li>Charset: {@code null} (ISO 8859-1)</li>
+   * <li>Charset: {@code null} (equivalent to ISO 8859-1 with no ECI block included)</li>
    * <li>Quiet zone size: 1</li>
    * </ul>
    * <p>
    * Settings by code type:
    * <ul>
-   * <li>QR Code version: {@link #QRCODE_VERSION_AUTO}</li>
-   * <li>QR Code error correction level: 1 (Medium or "M")</li>
-   * <li>DataMatrix size: {@link #DATAMATRIX_SIZE_AUTO}</li>
-   * <li>DataMatrix shape: {@link #DATAMATRIX_SHAPE_AUTO}</li>
-   * <li>PDF417 size: {@link TwoDSize}(0, 0)</li>
-   * <li>PDF417 error correction level: 2</li>
-   * <li>Aztec size: {@link #AZTEC_SIZE_AUTO}</li>
+   * <li>QR Code version: {@link QRCodeVersion#AUTO}</li>
+   * <li>QR Code error correction level: {@link QRCodeErrorCorrection#M}</li>
+   * <li>DataMatrix size: {@link DataMatrixSize#AUTO}</li>
+   * <li>DataMatrix shape: {@link DataMatrixShape#AUTO}</li>
+   * <li>PDF417 size: {@link PDF417Size}(0, 0) - fit to content in both dimensions</li>
+   * <li>PDF417 error correction level: {@link PDF417ErrorCorrection#EC2}</li>
+   * <li>Aztec size: {@link AztecSize#AUTO}</li>
    * <li>Aztec error correction level: 23</li>
    * </ul>
    */
@@ -271,15 +126,27 @@ public class TwoDCode implements Cloneable {
 
 
   /**
+   * Creates a new instance with the specified code type.
+   * <p>
+   * All other settings are the same as when using the {@link #TwoDCode() default constructor}.
+   *
+   * @param codeType the type of the 2D code to set
+   * @throws NullPointerException if the provided code type is {@code null}
+   */
+  public TwoDCode(TwoDType codeType) {
+    setType(codeType);
+  }
+
+
+
+  /**
    * Sets the type of the 2D code.
    *
    * @param codeType the type of the 2D code to set
-   * @throws IllegalArgumentException if the provided codeType is {@code null}
+   * @throws NullPointerException if the provided code type is {@code null}
    */
   public void setType(TwoDType codeType) {
-    if (codeType == null)
-      throw new IllegalArgumentException("Code type cannot be null");
-    pType = codeType;
+    myType = Objects.requireNonNull(codeType, "Code type cannot be null");
   }
 
 
@@ -287,36 +154,33 @@ public class TwoDCode implements Cloneable {
   /**
    * Sets the content to be encoded in the 2D code.
    * <p>
-   * <b>GS1 QR Code</b> + <b>GS1 DataMatrix</b>: For GS1 formatted data, ASCII 29 must be used as
-   * FNC1 separator character where necessary. Note that the content should NOT include the leading
-   * FNC1, which indicates the GS1 data structure. It is recommended to validate the content using
-   * the {@link de.vwsoft.barcodelib4j.oned.GS1Validator} class before setting. Example:
+   * <b>GS1 DataMatrix</b> and <b>GS1 QR Code</b>: It is recommended to validate the content using
+   * the {@link de.vwsoft.barcodelib4j.oned.GS1Validator} class before setting. Please refer to the
+   * class documentation for the expected input format requirements. Example:
    * <pre>
    *    import de.vwsoft.barcodelib4j.oned.BarcodeException;
    *    import de.vwsoft.barcodelib4j.oned.GS1Validator;
    *
-   *    String gs1 = "(01)01234567890128(15)191231";
-   *    String validated = null;
+   *    GS1Validator validator = null;
    *    try {
-   *      validated = new GS1Validator(gs1, (char)29).getContent();
+   *      validator = new GS1Validator(gs1Data, fnc1Char);
    *    } catch (BarcodeException ex) {
    *      // Validation failed
    *    }
    *
-   *    if (validated != null)
-   *      // ... use this method to set the validated value
+   *    if (validator != null)
+   *      twoDCode.setContent(validator.getContent());
    * </pre>
    *
    * @param content the content to be encoded
-   * @throws IllegalArgumentException if the provided content is {@code null} or empty
-   * @see de.vwsoft.barcodelib4j.oned.GS1Validator
+   * @throws NullPointerException if the provided content is {@code null}
+   * @throws IllegalArgumentException if the provided content is empty
    */
   public void setContent(String content) {
-    if (content == null)
-      throw new IllegalArgumentException("Content cannot be null");
+    Objects.requireNonNull(content, "Content cannot be null");
     if (content.isEmpty())
       throw new IllegalArgumentException("Content cannot be empty");
-    pContent = content;
+    myContent = content;
   }
 
 
@@ -325,12 +189,14 @@ public class TwoDCode implements Cloneable {
    * Specifies the character set used to encode the content in the 2D code.
    * <p>
    * If set to {@code null} (default), no character set information (ECI) is built into the code,
-   * and the default ISO 8859-1 character set is used. This is the default character set for all
-   * supported 2D types unless another character set is explicitly specified.
+   * and the ISO 8859-1 character set is used. This is the default character set for all supported
+   * 2D types unless another character set is explicitly specified.
    * <p>
-   * <b>GS1 QR Code</b> + <b>GS1 DataMatrix</b>: For GS1 code types, specifying a character set is
-   * usually unnecessary since GS1 data typically consists only of ASCII characters, compatible with
-   * ISO 8859-1.
+   * <b>DataMatrix</b>: The current implementation allows the use of character sets other than
+   * ISO 8859-1 only when its size is set to {@code AUTO}.
+   * <p>
+   * <b>GS1 DataMatrix</b> and <b>GS1 QR Code</b>: Specifying a character set is unnecessary since
+   * GS1 data consists only of ASCII characters, which are fully compatible with ISO 8859-1.
    *
    * @param charset the character set to be used for encoding the content, or {@code null} to
    *                indicate the default ISO 8859-1 charset with no ECI
@@ -341,7 +207,7 @@ public class TwoDCode implements Cloneable {
     // Charset#forName(String) outside of this class by having this method accept a pre-existing
     // Charset instance instead of a String. Also, some writers can perform various unwanted
     // fallbacks that lead to results that are not intended, if Charset#forName(String) fails.
-    pCharset = charset;
+    myCharset = charset;
   }
 
 
@@ -349,25 +215,16 @@ public class TwoDCode implements Cloneable {
   /**
    * Sets the size of the quiet zone for the 2D code.
    * <p>
-   * The quiet zone is the blank space around the 2D code that helps prevent interference or
-   * misreading of the code by surrounding elements. The size of the quiet zone is specified in
-   * modules. A module is the smallest single element in a 2D code, typically representing a single
-   * dot within the code.
-   * <p>
-   * Standard quiet zones for all supported 2D codes are available in the {@link ALL_QUIET_ZONES}
-   * array.
-   * <p>
-   * Note: For QR Codes, the specification defines a minimum quiet zone size of 4 modules. Although
-   * this minimum value is often used, it is not strictly adhered to and can vary depending on the
-   * application or implementation.
+   * For an explanation of what quiet zones are and the default quiet zone sizes for each 2D code
+   * type, see {@link TwoDType#getDefaultQuietZone()}.
    *
    * @param sizeInModules the size of the quiet zone in modules
    * @throws IllegalArgumentException if the specified size is negative
    */
-  public void setQuietZoneSize(int sizeInModules) {
+  public void setQuietZone(int sizeInModules) {
     if (sizeInModules < 0)
       throw new IllegalArgumentException("Quiet zone size cannot be negative: " + sizeInModules);
-    pQuietZoneSize = sizeInModules;
+    myQuietZoneSize = sizeInModules;
   }
 
 
@@ -375,22 +232,15 @@ public class TwoDCode implements Cloneable {
   /**
    * Sets the version of the QR Code.
    * <p>
-   * The version determines the size and data capacity of the QR Code. Valid values range from 1 to
-   * 40 inclusive. A version of 1 means a {@code 21x21} matrix and each subsequent version increases
-   * the matrix size by 4 modules. Version 40 represents a {@code 177x177} matrix. Use
-   * {@link #QRCODE_VERSION_AUTO} instead of a version number to automatically select the smallest
-   * version capable of encoding the content.
+   * The version determines the size and data capacity of the QR Code. Valid versions range from
+   * 1 (21x21 modules) to 40 (177x177 modules). Use {@link QRCodeVersion#AUTO} to automatically
+   * select the smallest version capable of encoding the content.
    *
-   * @param version the version number of the QR Code (1 to 40) or {@link #QRCODE_VERSION_AUTO}
-   * @throws IllegalArgumentException  if the specified version is not within the valid range
-   *                                   and does not match {@link #QRCODE_VERSION_AUTO}
-   * @see #QRCODE_SIZES
+   * @param version the version of the QR Code or {@link QRCodeVersion#AUTO}
+   * @throws NullPointerException if the specified version is {@code null}
    */
-  public void setQRCodeVersion(int version) {
-    if ((version < QRCODE_VERSION_MIN || version > QRCODE_VERSION_MAX) &&
-        version != QRCODE_VERSION_AUTO)
-      throw new IllegalArgumentException("Invalid QR Code version: " + version);
-    pQRVersion = version;
+  public void setQRCodeVersion(QRCodeVersion version) {
+    myQRVersion = Objects.requireNonNull(version, "QR Code version cannot be null");
   }
 
 
@@ -403,19 +253,13 @@ public class TwoDCode implements Cloneable {
    * M (Medium - ~15%), Q (Quartile - ~25%), and H (High - ~30%). The higher the error correction
    * level, the more redundancy is added, resulting in a higher resistance to errors, but also in a
    * larger symbol size.
-   * <p>
-   * The error correction level can be set to any value between 0 and 3 inclusive: 0 for "L",
-   * 1 for "M" (default), 2 for "Q", and 3 for "H".
    *
-   * @param errorCorrectionLevel the error correction level to set for QR Code in the range 0-3
-   * @throws IllegalArgumentException  if the specified error correction level is outside the valid
-   *                                   range
+   * @param errorCorrectionLevel the error correction level to set for QR Code
+   * @throws NullPointerException if the specified error correction level is {@code null}
    */
-  public void setQRCodeErrCorr(int errorCorrectionLevel) {
-    if (errorCorrectionLevel < QRCODE_ERR_CORR_MIN || errorCorrectionLevel > QRCODE_ERR_CORR_MAX)
-      throw new IllegalArgumentException(
-          "Invalid QR Code error correction level: " + errorCorrectionLevel);
-    pQRErrCorr = errorCorrectionLevel;
+  public void setQRCodeErrCorr(QRCodeErrorCorrection errorCorrectionLevel) {
+    myQRErrCorr = Objects.requireNonNull(errorCorrectionLevel,
+        "QR Code error correction level cannot be null");
   }
 
 
@@ -423,26 +267,16 @@ public class TwoDCode implements Cloneable {
   /**
    * Sets the size of the DataMatrix symbol.
    * <p>
-   * The size index [minus 1] represents the index of the DataMatrix symbol size in the
-   * {@link #DATAMATRIX_SIZES} array. The value ranges from 1 to 30, inclusive, where 1 corresponds
-   * to the smallest size {@code (10x10)} and 30 corresponds to the largest size {@code (144x144)}.
-   * Use {@link #DATAMATRIX_SIZE_AUTO} instead of a size index to automatically select the smallest
-   * size capable of encoding the content.
-   * <p>
-   * Note: The DataMatrix implementation allows the use of character sets other than ISO 8859-1 only
-   * when the size is set to {@link #DATAMATRIX_SIZE_AUTO}.
+   * The size determines the data capacity of the DataMatrix symbol. Valid sizes range from 10x10
+   * modules to 144x144 modules. The 30 available sizes include 24 square and 6 rectangular
+   * variants. Use {@link DataMatrixSize#AUTO} to automatically select the smallest size capable of
+   * encoding the content.
    *
-   * @param sizeIndex the index (1 to 30) specifying the size of the DataMatrix symbol or
-   *                  {@link #DATAMATRIX_SIZE_AUTO}
-   * @throws IllegalArgumentException  if the specified size index is not within the valid range
-   *                                   and does not match {@link #DATAMATRIX_SIZE_AUTO}
-   * @see #DATAMATRIX_SIZES
+   * @param size the size of the DataMatrix symbol or {@link DataMatrixSize#AUTO}
+   * @throws NullPointerException if the specified size is {@code null}
    */
-  public void setDataMatrixSize(int sizeIndex) {
-    if ((sizeIndex < DATAMATRIX_SIZE_MIN || sizeIndex > DATAMATRIX_SIZE_MAX) &&
-        sizeIndex != DATAMATRIX_SIZE_AUTO)
-      throw new IllegalArgumentException("Invalid DataMatrix size index: " + sizeIndex);
-    pDMSize = sizeIndex;
+  public void setDataMatrixSize(DataMatrixSize size) {
+    myDMSize = Objects.requireNonNull(size, "DataMatrix size cannot be null");
   }
 
 
@@ -452,21 +286,21 @@ public class TwoDCode implements Cloneable {
    * <p>
    * Valid values are:
    * <ul>
-   * <li>{@link #DATAMATRIX_SHAPE_SQUARE}: Square shape</li>
-   * <li>{@link #DATAMATRIX_SHAPE_RECTANGLE}: Rectangular shape</li>
-   * <li>{@link #DATAMATRIX_SHAPE_AUTO}: Automatically select the shape that best fits the
+   * <li>{@link DataMatrixShape#SQUARE} - Square shape</li>
+   * <li>{@link DataMatrixShape#RECTANGLE} - Rectangular shape</li>
+   * <li>{@link DataMatrixShape#AUTO} - Automatically select the shape that best fits the
    *   content</li>
    * </ul>
+   * <p>
+   * Note: This setting is ignored when a fixed size (not {@code AUTO}) is specified via
+   * {@link #setDataMatrixSize(DataMatrixSize) setDataMatrixSize},
+   * as the size already determines whether the symbol is square or rectangular.
    *
    * @param shape the shape of the DataMatrix symbol
-   * @throws IllegalArgumentException if the provided shape is not one of the valid constants
+   * @throws NullPointerException if the provided shape is {@code null}
    */
-  public void setDataMatrixShape(int shape) {
-    if (shape != DATAMATRIX_SHAPE_AUTO &&
-        shape != DATAMATRIX_SHAPE_SQUARE &&
-        shape != DATAMATRIX_SHAPE_RECTANGLE)
-      throw new IllegalArgumentException("Invalid DataMatrix shape: " + shape);
-    pDMShape = shape;
+  public void setDataMatrixShape(DataMatrixShape shape) {
+    myDMShape = Objects.requireNonNull(shape, "DataMatrix shape cannot be null");
   }
 
 
@@ -475,25 +309,15 @@ public class TwoDCode implements Cloneable {
    * Sets the size of the PDF417 symbol.
    * <p>
    * The PDF417 symbol size is specified in terms of the number of columns and rows. The number of
-   * columns can range from 1 to 30, and the number of rows can range from 3 to 90. If the width or
-   * height value is set to {@code 0}, the respective value is automatically selected based on the
+   * columns can range from 1 to 30, and the number of rows can range from 3 to 90. If the columns
+   * or rows value is set to {@code 0}, the respective value is automatically selected based on the
    * content to be encoded.
    *
-   * @param size the size of the PDF417 symbol represented by a {@link TwoDSize} object
-   * @throws IllegalArgumentException  if the provided size is {@code null}, or if the specified
-   *                                   column or row have invalid values
+   * @param size the size of the PDF417 symbol
+   * @throws NullPointerException if the provided size is {@code null}
    */
-  public void setPDF417Size(TwoDSize size) {
-    if (size == null)
-      throw new IllegalArgumentException("PDF417 size cannot be null.");
-
-    if ((size.width < PDF417_COLUMNS_MIN || size.width > PDF417_COLUMNS_MAX) && size.width != 0)
-      throw new IllegalArgumentException("Invalid PDF417 column count: " + size.width);
-
-    if ((size.height < PDF417_ROWS_MIN || size.height > PDF417_ROWS_MAX) && size.height != 0)
-      throw new IllegalArgumentException("Invalid PDF417 row count: " + size.height);
-
-    pPDSize = size;
+  public void setPDF417Size(PDF417Size size) {
+    myPDSize = Objects.requireNonNull(size, "PDF417 size cannot be null");
   }
 
 
@@ -504,39 +328,34 @@ public class TwoDCode implements Cloneable {
    * The parameter specifies the amount of redundant data added to the symbol to enable error
    * recovery. The higher the error correction level, the more redundancy is added, resulting in a
    * higher resistance to errors, but also in a larger symbol size. PDF417 supports error correction
-   * levels from 0 to 8.
+   * levels from {@code 0} to {@code 8}.
    *
-   * @param errorCorrectionLevel the error correction level to set for PDF417 in the range 0-8
-   * @throws IllegalArgumentException if the specified error correction level is outside the valid
-   *                                  range
+   * @param errorCorrectionLevel the error correction level to set for PDF417
+   * @throws NullPointerException if the specified error correction level is {@code null}
    */
-  public void setPDF417ErrCorr(int errorCorrectionLevel) {
-    if (errorCorrectionLevel < PDF417_ERR_CORR_MIN || errorCorrectionLevel > PDF417_ERR_CORR_MAX)
-      throw new IllegalArgumentException(
-          "Invalid PDF417 error correction level: " + errorCorrectionLevel);
-    pPDErrCorr = errorCorrectionLevel;
+  public void setPDF417ErrCorr(PDF417ErrorCorrection errorCorrectionLevel) {
+    myPDErrCorr = Objects.requireNonNull(errorCorrectionLevel,
+        "PDF417 error correction level cannot be null");
   }
 
 
 
   /**
-   * Sets the size of the Aztec code symbol. The parameter can have the following values:
-   * <ul>
-   * <li>{@link #AZTEC_SIZE_AUTO} indicates that the smallest possible size capable of encoding the
-   *   content is selected automatically (default).</li>
-   * <li>Negative numbers (-1, -2, -3, -4) represent compact Aztec codes.
-   *   See: {@link #AZTEC_SIZES_COMPACT}.</li>
-   * <li>Positive numbers (1, 2, ... 32) represent normal (non-compact) Aztec codes.
-   *   See: {@link #AZTEC_SIZES_NORMAL}.</li>
-   * </ul>
-   * @param sizeIndex  the index specifying the size of the Aztec code or {@link #AZTEC_SIZE_AUTO}
-   * @throws IllegalArgumentException  if the specified size index is not within the valid ranges
-   *                                   and does not match {@link #AZTEC_SIZE_AUTO}
+   * Sets the size of the Aztec code symbol.
+   * <p>
+   * Aztec symbols come in two types that differ in their internal structure. Compact symbols
+   * (1 to 4 layers, 15x15 to 27x27 modules) have a smaller bullseye finder pattern and less
+   * error correction overhead, making them efficient for small data amounts. Normal symbols
+   * (1 to 32 layers, 19x19 to 151x151 modules) have a larger bullseye finder pattern and more
+   * robust error correction, providing better readability and greater data capacity. Use
+   * {@link AztecSize#AUTO} to automatically select the smallest size capable of encoding the
+   * content, preferring compact sizes when possible.
+   *
+   * @param size the size of the Aztec symbol or {@link AztecSize#AUTO}
+   * @throws NullPointerException if the specified size is {@code null}
    */
-  public void setAztecSize(int sizeIndex) {
-    if ((sizeIndex < -4 || sizeIndex > 32) && sizeIndex != AZTEC_SIZE_AUTO)
-      throw new IllegalArgumentException("Invalid Aztec size index: " + sizeIndex);
-    pAZSize = sizeIndex;
+  public void setAztecSize(AztecSize size) {
+    myAZSize = Objects.requireNonNull(size, "Aztec size cannot be null");
   }
 
 
@@ -549,15 +368,15 @@ public class TwoDCode implements Cloneable {
    * 5% to 95%. Higher error correction levels add more redundancy data, increasing the symbol's
    * ability to withstand errors but also increasing its size.
    *
-   * @param errorCorrectionLevel  the error correction level for Aztec, specified in percent
-   * @throws IllegalArgumentException  if the specified error correction level is outside the valid
-   *                                   range
+   * @param errorCorrectionLevel the error correction level for Aztec, specified in percent
+   * @throws IllegalArgumentException if the specified error correction level is outside the valid
+   *                                  range
    */
   public void setAztecErrCorr(int errorCorrectionLevel) {
-    if (errorCorrectionLevel < AZTEC_ERR_CORR_MIN || errorCorrectionLevel > AZTEC_ERR_CORR_MAX)
+    if (errorCorrectionLevel < 5 || errorCorrectionLevel > 95)
       throw new IllegalArgumentException(
           "Invalid Aztec error correction level: " + errorCorrectionLevel);
-    pAZErrCorr = errorCorrectionLevel;
+    myAZErrCorr = errorCorrectionLevel;
   }
 
 
@@ -565,10 +384,11 @@ public class TwoDCode implements Cloneable {
   /**
    * Checks if the specified charset can encode the given content.
    * <p>
-   * If no charset is specified (i.e., {@code null}), ISO 8859-1 is checked as this is the default
+   * If no character set is specified ({@code null}), ISO 8859-1 is checked as this is the default
    * charset used by all supported 2D code implementations.
    * <p>
-   * For several reasons, it is recommended to call this method before building the 2D code symbol:
+   * For several reasons, it is recommended to call this method before building the 2D code symbol
+   * using the {@link #buildSymbol()} method:
    * <ul>
    * <li>Some 2D code implementations (QR Code, Aztec) will generate the symbol even if the content
    *   cannot be encoded correctly with the specified charset, resulting in a 2D code that no longer
@@ -578,12 +398,12 @@ public class TwoDCode implements Cloneable {
    *   the check in advance.</li>
    * </ul>
    *
-   * @return {@code true} if the specified charset can encode the content, {@code false} otherwise.
+   * @return {@code true} if the specified charset can encode the content, {@code false} otherwise
    */
   public boolean canEncode() {
-    Charset cs = pCharset != null ? pCharset : StandardCharsets.ISO_8859_1;
+    Charset cs = myCharset != null ? myCharset : StandardCharsets.ISO_8859_1;
     try {
-      cs.newEncoder().encode(CharBuffer.wrap(pContent));
+      cs.newEncoder().encode(CharBuffer.wrap(myContent));
       return true;
     } catch (CharacterCodingException ex) {
       return false;
@@ -622,54 +442,53 @@ public class TwoDCode implements Cloneable {
     // Set the MARGIN value explicitly to "0" here. This hint is not implemented by all code types
     // or may have a predefined value. We will add any quiet zones ourselves.
     hints.put(EncodeHintType.MARGIN, 0);
-    hints.put(EncodeHintType.GS1_FORMAT, pType.isGS1());
-    if (pCharset != null)
-      hints.put(EncodeHintType.CHARACTER_SET, pCharset.name());
+    hints.put(EncodeHintType.GS1_FORMAT, myType.isGS1());
+    if (myCharset != null)
+      hints.put(EncodeHintType.CHARACTER_SET, myCharset.name());
 
     // Step 2: - Assign matching ZXing's BarcodeFormat constant and a Writer implementation
     //         - Configure hints based on the code type
     BarcodeFormat barcodeFormat = null;
     Writer writer = null;
-    switch (pType) {
+    switch (myType) {
       case GS1_QRCODE:
       case QRCODE:
         barcodeFormat = BarcodeFormat.QR_CODE;
         writer = new QRCodeWriter();
-        if (pQRVersion != QRCODE_VERSION_AUTO)
-          hints.put(EncodeHintType.QR_VERSION, pQRVersion);
-        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.values()[pQRErrCorr]);
+        if (myQRVersion != QRCodeVersion.AUTO)
+          hints.put(EncodeHintType.QR_VERSION, myQRVersion.getNumber());
+        hints.put(EncodeHintType.ERROR_CORRECTION, myQRErrCorr.name());
         break;
       case GS1_DATAMATRIX:
       case DATAMATRIX:
         barcodeFormat = BarcodeFormat.DATA_MATRIX;
         writer = new DataMatrixWriter();
-        if (pDMSize != DATAMATRIX_SIZE_AUTO) { // No charset setting/ECI is supported in this mode
-          TwoDSize dmSize = DATAMATRIX_SIZES[pDMSize - 1];
-          Dimension dim = new Dimension(dmSize.width, dmSize.height);
-          hints.put(EncodeHintType.MIN_SIZE, dim);
-          hints.put(EncodeHintType.MAX_SIZE, dim);
+        if (myDMSize != DataMatrixSize.AUTO) { // No charset setting/ECI is supported in this mode
+          Dimension dim = new Dimension(myDMSize.getWidth(), myDMSize.getHeight());
+          hints.put(EncodeHintType.MIN_SIZE, dim); // Deprecated but still allowed for DataMatrix
+          hints.put(EncodeHintType.MAX_SIZE, dim); // Deprecated but still allowed for DataMatrix
         } else {
-          hints.put(EncodeHintType.DATA_MATRIX_SHAPE, SymbolShapeHint.values()[pDMShape]);
-          if (pCharset != null) // Charset setting/ECI is only supported in compact mode
+          hints.put(EncodeHintType.DATA_MATRIX_SHAPE, SymbolShapeHint.values()[myDMShape.getID()]);
+          if (myCharset != null) // Charset setting/ECI is only supported in compact mode
             hints.put(EncodeHintType.DATA_MATRIX_COMPACT, true);
         }
         break;
       case PDF417:
         barcodeFormat = BarcodeFormat.PDF_417;
         writer = new PDF417Writer();
-        int minCols = pPDSize.width  != 0 ? pPDSize.width  : PDF417_COLUMNS_MIN;
-        int maxCols = pPDSize.width  != 0 ? pPDSize.width  : PDF417_COLUMNS_MAX;
-        int minRows = pPDSize.height != 0 ? pPDSize.height : PDF417_ROWS_MIN;
-        int maxRows = pPDSize.height != 0 ? pPDSize.height : PDF417_ROWS_MAX;
+        int minCols = myPDSize.cols != 0 ? myPDSize.cols : PDF417Size.COLS_MIN;
+        int maxCols = myPDSize.cols != 0 ? myPDSize.cols : PDF417Size.COLS_MAX;
+        int minRows = myPDSize.rows != 0 ? myPDSize.rows : PDF417Size.ROWS_MIN;
+        int maxRows = myPDSize.rows != 0 ? myPDSize.rows : PDF417Size.ROWS_MAX;
         hints.put(EncodeHintType.PDF417_DIMENSIONS,
             new Dimensions(minCols, maxCols, minRows, maxRows));
-        hints.put(EncodeHintType.ERROR_CORRECTION, pPDErrCorr);
+        hints.put(EncodeHintType.ERROR_CORRECTION, myPDErrCorr.getLevelNumber());
         break;
       case AZTEC:
         barcodeFormat = BarcodeFormat.AZTEC;
         writer = new AztecWriter();
-        hints.put(EncodeHintType.AZTEC_LAYERS, pAZSize);
-        hints.put(EncodeHintType.ERROR_CORRECTION, pAZErrCorr);
+        hints.put(EncodeHintType.AZTEC_LAYERS, myAZSize.getLayerCount());
+        hints.put(EncodeHintType.ERROR_CORRECTION, myAZErrCorr);
     }
 
     // Step 3: We use the selected "BarcodeFormat", "Writer" and hints established in previous steps
@@ -677,81 +496,90 @@ public class TwoDCode implements Cloneable {
     // specific implementation of the "Writer", while "WriterException" is just one example. To
     // ensure comprehensive error handling, we catch and delegate any potential exceptions by using
     // "throw Exception" in this method's declaration.
-    BitMatrix bitMatrix = writer.encode(pContent, barcodeFormat, 0, 0, hints);
+    BitMatrix bitMatrix = writer.encode(myContent, barcodeFormat, 0, 0, hints);
 
-    return new TwoDSymbol(bitMatrix, pQuietZoneSize);
+    return new TwoDSymbol(bitMatrix, myQuietZoneSize);
   }
 
 
 
   /** {@return the type of the 2D code} */
   public TwoDType getType() {
-    return pType;
+    return myType;
   }
 
   /** {@return the content encoded in the 2D code} */
   public String getContent() {
-    return pContent;
+    return myContent;
   }
 
   /** {@return the character set used for encoding the content} */
   public Charset getCharset() {
-    return pCharset;
+    return myCharset;
   }
 
   /** {@return the size of the quiet zone around the 2D code} */
-  public int getQuietZoneSize() {
-    return pQuietZoneSize;
+  public int getQuietZone() {
+    return myQuietZoneSize;
   }
 
   /** {@return the version of the QR Code} */
-  public int getQRCodeVersion() {
-    return pQRVersion;
+  public QRCodeVersion getQRCodeVersion() {
+    return myQRVersion;
   }
 
   /** {@return the error correction level of the QR Code} */
-  public int getQRCodeErrCorr() {
-    return pQRErrCorr;
+  public QRCodeErrorCorrection getQRCodeErrCorr() {
+    return myQRErrCorr;
   }
 
   /** {@return the size of the DataMatrix symbol} */
-  public int getDataMatrixSize() {
-    return pDMSize;
+  public DataMatrixSize getDataMatrixSize() {
+    return myDMSize;
   }
 
   /** {@return the shape of the DataMatrix symbol} */
-  public int getDataMatrixShape() {
-    return pDMShape;
+  public DataMatrixShape getDataMatrixShape() {
+    return myDMShape;
   }
 
   /** {@return the size of the PDF417 symbol} */
-  public TwoDSize getPDF417Size() {
-    return pPDSize;
+  public PDF417Size getPDF417Size() {
+    return myPDSize;
   }
 
   /** {@return the error correction level of the PDF417} */
-  public int getPDF417ErrCorr() {
-    return pPDErrCorr;
+  public PDF417ErrorCorrection getPDF417ErrCorr() {
+    return myPDErrCorr;
   }
 
-  /** {@return the size index of the Aztec symbol} */
-  public int getAztecSize() {
-    return pAZSize;
+  /** {@return the size of the Aztec symbol} */
+  public AztecSize getAztecSize() {
+    return myAZSize;
   }
 
   /** {@return the error correction level of the Aztec} */
   public int getAztecErrCorr() {
-    return pAZErrCorr;
+    return myAZErrCorr;
   }
 
 
 
   /**
-   * {@return a copy of this object} The returned copy can be considered and used as a "deep copy".
+   * {@return a copy of this object}
+   * <p>
+   * The returned copy is independent of the original and can be modified without affecting it.
+   * All instance members are either primitive or immutable types, or will be automatically
+   * rebuilt when any of the instance's properties change. Thus, the copy can be handled
+   * as if it were a "deep copy".
    */
   @Override
-  public Object clone() {
-    try { return super.clone(); } catch (Exception e) { return null; }
+  public TwoDCode clone() {
+    try {
+      return (TwoDCode)super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Unexpected: Clone not supported", e);
+    }
   }
 
 }

@@ -32,52 +32,63 @@ import java.util.regex.Pattern;
 
 
 /**
- * Validates GS1 structured data and generates the corresponding human readable representation. The
- * class performs tasks such as calculating check digits for GTIN and SSCC and verifying the length
- * and format of data for compliance with the respective Application Identifiers (AI).
+ * Validates GS1 structured data and generates its human-readable representation.
  * <p>
- * <b>Rules for the input format:</b>
+ * This class is typically used when preparing input for GS1-128, GS1 DataMatrix, and GS1 QR Code.
  * <p>
- * The first character in the input may or may not be an FNC1. The input may or may not include
- * round brackets (parentheses), therefore both forms are equally accepted:
+ * <b>Recommended Input Format (Simple Way)</b>
+ * <p>
+ * For composing GS1 data, use this input format:
+ * <ol>
+ *   <li>No leading FNC1 character</li>
+ *   <li>Each Application Identifier (AI) enclosed in parentheses</li>
+ *   <li>FNC1 character after each AI-data pair as separator</li>
+ * </ol>
+ * Example:
  * <pre>
- *    <b>01</b>01234567890128<b>15</b>191231
- *    <b>(01)</b>01234567890128<b>(15)</b>191231
+ *   String content = "(01)01234567890128" + fnc1 +
+ *                    "(15)251231" + fnc1 +
+ *                    "(10)ABC123" + fnc1;
+ *   GS1Validator validator = new GS1Validator(content, fnc1);
  * </pre>
- * After validation, the human readable text returned by {@link #getText()} includes all necessary
- * parentheses, regardless of the form in which the input was provided. The {@link #getContent()}
- * method returns the data in a strictly formatted form suitable for representation in a barcode.
+ * Key Points:
+ * <ol>
+ *   <li>For GS1 DataMatrix and GS1 QR Code use {@code (char)29} as FNC1. For GS1-128 use the
+ *     {@link de.vwsoft.barcodelib4j.oned.ImplCode128#FNC1} constant.</li>
+ *   <li>Unnecessary FNC1 characters will be removed automatically by the validator to ensure an
+ *     optimal and space-saving structure of the encoded data.</li>
+ *   <li>Parentheses around AIs are never encoded in the barcode but are displayed in the
+ *     human-readable line.</li>
+ *   <li>Tip: Place one of your variable-length AIs at the end of your data sequence to save
+ *     one FNC1 character.</li>
+ * </ol>
  * <p>
- * <b>Rules for using FNC1 as AI separator:</b>
+ * <b>Alternative Input Formats</b>
+ * <p>
+ * The validator also accepts pre-composed data (e.g., from user input, databases etc.):
  * <ul>
- *   <li>If the schema of a particular AI defines a <b>fixed length</b> for the encoded data,
- *     there's no need to indicate the end of the data. This also applies if the data unit is
- *     positioned at the end of the GS1 data structure. In both cases no FNC1 is required.</li>
- *   <li>If the schema of a particular AI defines a <b>variable length</b> for the encoded data, the
- *     end of the data must be marked with an FNC1. However, if the given AI schema does not allow
- *     round brackets within the data itself, an opening bracket "(" can be conveniently used
- *     instead of an FNC1 to introduce the next AI, as the bracket will be identified by the
- *     algorithm as not being part of the data and therefore replaced by an FNC1 automatically.</li>
- *   <li>If unsure whether an FNC1 should be used in a specific case, it's recommended to use it.
- *     The algorithm removes all unnecessary FNC1 characters to ensure an optimal and space-saving
- *     structure of the encoded data.</li>
+ *   <li>With parentheses: {@code (01)01234567890128(15)251231(10)ABC123}</li>
+ *   <li>Without parentheses: {@code 01012345678901281525123110ABC123}</li>
+ *   <li>With or without leading FNC1</li>
+ *   <li>Important: AIs with variable-length data must be terminated with FNC1 (unless at end)</li>
  * </ul>
  * <p>
- * <b>Rules for SSCC and GTIN (AI 00, 01, 02):</b>
+ * <b>SSCC/GTIN Check Digits (AI 00, 01, 02)</b>
  * <p>
- * These special numbers must end with either a correct pre-computed check digit or with the
- * placeholder character defined by {@link #CHECKSUM_PLACEHOLDER}. Example:
- * <pre>    (01)0123456789012<b>#</b>(15)191231</pre>
- * If a placeholder is present, the missing check digit is automatically calculated and replaced. If
- * a check digit is already present, it is verified, and a {@link BarcodeException} is thrown if it
- * is incorrect.
+ * Use <b>#</b> as placeholder for automatic check digit calculation:
+ * <pre>
+ *   "(01)0123456789012#"  // Check digit will be calculated
+ *   "(01)01234567890128"  // Check digit will be verified
+ * </pre>
+ * The placeholder character is stored in {@link #CHECKSUM_PLACEHOLDER} (static, non-final) and can
+ * be customized if needed.
  */
 public class GS1Validator {
 
   /**
-   * Wildcard character that can be used in <b>AI 00</b> to <b>AI 02</b> (SSCC/GTIN) in place of
-   * the checksum to force its automatic calculation. The static variable can be set to any other
-   * character instead of the default ('#') if needed.
+   * Placeholder character that can be used in SSCC/GTIN numbers (AI 00, 01, 02) in place of the
+   * check digit to force its automatic calculation. As a static non-final variable it can be
+   * changed from the default ('#') if needed.
    */
   public static char CHECKSUM_PLACEHOLDER = '#';
 
@@ -247,18 +258,17 @@ public class GS1Validator {
 
 
 
-  private String myContent; // The "raw" content as encoded in the barcode
-  private String myText;    // Human readable representation
+  private final String myContent; // The validated data for encoding in a GS1 barcode
+  private final String myText;    // The validated data in human-readable format
 
 
 
   /**
-   * Constructs a new instance and validates the specified content.
+   * Constructs a new instance and validates the provided GS1 data.
    *
-   * @param content   the content to be validated
-   * @param fnc1Char  the FNC1 character used as a separator within the content, and also used in
-                      the output returned by {@link #getContent()}
-   * @throws BarcodeException if the content is empty or invalid according to the GS1 standards
+   * @param content   the GS1 data to validate (see class documentation for format options)
+   * @param fnc1Char  the character used as FNC1 separator within the provided GS1 data
+   * @throws BarcodeException if the content is empty or invalid according to GS1 standards
    */
   public GS1Validator(String content, char fnc1Char) throws BarcodeException {
     final int len = content.length();
@@ -309,7 +319,7 @@ public class GS1Validator {
             "No valid AI found at position %s",
             "Kein g\u00FCltiger AI an Position %s gefunden", idx);
 
-      // Step 2: Extract the data corresponding to the identified AI
+      // Step 2: Extract the data associated with the identified AI
       String data;
       int k;
       if (ai.delimiter > 0) { // AI expects a fixed length of data
@@ -326,7 +336,7 @@ public class GS1Validator {
       }
       data = content.substring(idx, k);
 
-      // Step 3: Verify integrity of data
+      // Step 3: Validate the extracted data
       if (ai.delimiter > 0 && ai.delimiter != data.length())
         throw new BarcodeException(BarcodeException.CONTENT_LENGTH_INVALID,
             "Value of AI %s must consist of %s characters; Provided: %s",
@@ -388,12 +398,7 @@ public class GS1Validator {
 
 
   /**
-   * {@return the validated raw data as it will be encoded in the barcode}
-   * <p>
-   * Please note that the returned string does not include the leading FNC1 character, which is used
-   * to identify the GS1 data structure. This is because its "raw" value may differ from that of the
-   * FNC1 character used as a separator. However, a leading FNC1 character is automatically added by
-   * {@link ImplEAN128 GS1-128} and {@link de.vwsoft.barcodelib4j.twod.TwoDCode} prior to encoding.
+   * {@return the validated data for encoding in a GS1 barcode}
    */
   public String getContent() {
     return myContent;
@@ -402,9 +407,11 @@ public class GS1Validator {
 
 
   /**
-   * {@return the validated data as human readable text}
+   * {@return the validated data in human-readable format}
    * <p>
-   * Application Identifier (AI) numbers are enclosed in round brackets (parentheses).
+   * All Application Identifiers are enclosed in parentheses for readability. No FNC1 is included.
+   * <p>
+   * Example: {@code (01)01234567890128(15)251231(10)ABC123}
    */
   public String getText() {
     return myText;

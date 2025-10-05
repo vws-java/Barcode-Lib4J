@@ -62,11 +62,11 @@ public class ImplCode93 extends Barcode {
     final int rightQuietZone = getQuietZoneRight();
     sb = new StringBuilder(9 * len + 1 + leftQuietZone + rightQuietZone);
 
-    sb.append(repeat('0', leftQuietZone));
+    sb.append("0".repeat(leftQuietZone));
     for (int i=0; i<len; i++)
       sb.append(Integer.toBinaryString(BARS[CHARS.indexOf(value.charAt(i))]));
     sb.append('1'); // "termination bar"
-    sb.append(repeat('0', rightQuietZone));
+    sb.append("0".repeat(rightQuietZone));
 
     return sb;
   }
@@ -97,7 +97,7 @@ public class ImplCode93 extends Barcode {
         throwInvalidCharacter(i);
 
     myContent = content;
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

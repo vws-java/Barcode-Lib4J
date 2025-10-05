@@ -30,7 +30,7 @@ package de.vwsoft.barcodelib4j.oned;
  * The encoded data must begin and end with one of the above start/stop characters. These characters
  * can be either different or the same.
  */
-public class ImplCodabar extends LineageTwoWidth {
+public class ImplCodabar extends Barcode {
 
   private static final String CHARS = "0123456789-$:/.+ABCD";
   private static final int BARS[] = { 3,6,9,96,18,66,33,36,48,72,12,24,69,81,84,21,26,41,11,14 };
@@ -45,10 +45,18 @@ public class ImplCodabar extends LineageTwoWidth {
 
 
 
+  /** @hidden */
+  @Override
+  public boolean supportsRatio() {
+    return true;
+  }
+
+
+
   @Override
   CharSequence encode() {
-    final String[] bars   = { repeat('1', myRatio.y), repeat('1', myRatio.x) };
-    final String[] spaces = { repeat('0', myRatio.y), repeat('0', myRatio.x) };
+    final String[] bars   = { "1".repeat(myRatio.y), "1".repeat(myRatio.x) };
+    final String[] spaces = { "0".repeat(myRatio.y), "0".repeat(myRatio.x) };
 
     final int leftQuietZone = getQuietZoneLeft() * myRatio.y;
     final int rightQuietZone = getQuietZoneRight() * myRatio.y;
@@ -58,7 +66,7 @@ public class ImplCodabar extends LineageTwoWidth {
     StringBuilder sb = new StringBuilder(len * (3 * myRatio.x + 5 * myRatio.y) +
         leftQuietZone + rightQuietZone);
 
-    sb.append(repeat('0', leftQuietZone));
+    sb.append("0".repeat(leftQuietZone));
     for (int i=0; i<len; i++) {
       final int n = BARS[CHARS.indexOf(myContent.charAt(i))];
       for (int j=6; j>0; ) {
@@ -69,7 +77,7 @@ public class ImplCodabar extends LineageTwoWidth {
       if (i < len - 1)
         sb.append(spaces[0]);
     }
-    sb.append(repeat('0', rightQuietZone));
+    sb.append("0".repeat(rightQuietZone));
 
     return sb;
   }
@@ -148,7 +156,7 @@ public class ImplCodabar extends LineageTwoWidth {
         throwInvalidCharacter(i);
 
     myContent = content;
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

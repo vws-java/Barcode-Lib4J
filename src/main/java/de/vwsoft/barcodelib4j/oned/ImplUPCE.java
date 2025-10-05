@@ -22,10 +22,10 @@ package de.vwsoft.barcodelib4j.oned;
 /**
  * Implementation of UPC-E.
  */
-public class ImplUPCE extends LineageUPC {
+public class ImplUPCE extends UPCEANFamily {
 
-  private static final String BAR_LENGTH_PATTERN = repeat('1', 3) + repeat('0', 42) +
-      repeat('1', 6) + repeat('2', 7 + 47);
+  private static final String BAR_LENGTH_PATTERN = "1".repeat(3) + "0".repeat(42) +
+      "1".repeat(6) + "2".repeat(7 + 47);
 
   private static final int[] CHARSET_PATTERN = { 56, 52, 50, 49, 44, 38, 35, 42, 41, 37 };
 
@@ -88,7 +88,7 @@ public class ImplUPCE extends LineageUPC {
     }
 
     myContent = content;
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 
@@ -119,7 +119,7 @@ public class ImplUPCE extends LineageUPC {
   CharSequence encode() {
     StringBuilder sb = new StringBuilder(119);
 
-    sb.append(repeat('0', getQuietZoneLeft()));     // left quiet zone
+    sb.append("0".repeat(getQuietZoneLeft()));      // left quiet zone
     sb.append("101");                               // left guards
     int firstDigit = myContent.charAt(0) - 48;
     int pattern = CHARSET_PATTERN[myContent.charAt(7) - 48];
@@ -128,7 +128,7 @@ public class ImplUPCE extends LineageUPC {
       sb.append((pattern >> (6 - i) & 1) == firstDigit ? encodeA(digit) : encodeB(digit));
     }
     sb.append("010101");                            // right guards
-    sb.append(repeat('0', getQuietZoneRight()));    // right quiet zone
+    sb.append("0".repeat(getQuietZoneRight()));     // right quiet zone
     encodeAddOn(sb);                                // add-on, if present
 
     return sb;

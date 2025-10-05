@@ -22,10 +22,10 @@ package de.vwsoft.barcodelib4j.oned;
 /**
  * Implementation of UPC-A.
  */
-public class ImplUPCA extends LineageUPC {
+public class ImplUPCA extends UPCEANFamily {
 
-  private static final String BAR_LENGTH_PATTERN = repeat('1', 10) + repeat('0', 35) +
-      repeat('1', 5) + repeat('0', 35) + repeat('1', 10) + repeat('2', 9 + 47);
+  private static final String BAR_LENGTH_PATTERN = "1".repeat(10) + "0".repeat(35) +
+      "1".repeat(5) + "0".repeat(35) + "1".repeat(10) + "2".repeat(9 + 47);
 
 
 
@@ -78,7 +78,7 @@ public class ImplUPCA extends LineageUPC {
     }
 
     myContent = content;
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

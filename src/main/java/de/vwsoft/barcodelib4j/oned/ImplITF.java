@@ -33,17 +33,8 @@ package de.vwsoft.barcodelib4j.oned;
  * displayed in the human readable text. When the check digit is used, it changes the total length
  * of the encoded content, which may affect the evenness of the total length. This should be
  * considered when preparing content for encoding.
- * <p>
- * This class extends the abstract class {@link LineageTwoWidth}, as Interleaved 2 of 5 is a
- * type of two-width barcode. See the linked class description for more information.
- * <p>
- * <b>Barcode scanner configuration:</b> When using Interleaved 2 of 5 without a check digit, it is
- * advisable to configure the scanner to expect a constant number of characters. This is because the
- * start and stop patterns are not unique, making the format vulnerable. If the scanner enters or
- * exits the code at a point that resembles a start or stop pattern, the code may be scanned
- * incompletely.
  */
-public class ImplITF extends LineageTwoWidth {
+public class ImplITF extends Barcode {
 
   private static final int[] BARS = { 6, 17, 9, 24, 5, 20, 12, 3, 18, 10 }; // Code patterns
 
@@ -67,8 +58,8 @@ public class ImplITF extends LineageTwoWidth {
       content += myOptionalChecksum;
     final int contentLength = content.length();
 
-    final String[] bars   = { repeat('1', myRatio.y), repeat('1', myRatio.x) };
-    final String[] spaces = { repeat('0', myRatio.y), repeat('0', myRatio.x) };
+    final String[] bars   = { "1".repeat(myRatio.y), "1".repeat(myRatio.x) };
+    final String[] spaces = { "0".repeat(myRatio.y), "0".repeat(myRatio.x) };
 
     final int leftQuietZone = getQuietZoneLeft() * myRatio.y;
     final int rightQuietZone = getQuietZoneRight() * myRatio.y;
@@ -76,7 +67,7 @@ public class ImplITF extends LineageTwoWidth {
     StringBuilder sb = new StringBuilder(myRatio.y * 6 + leftQuietZone + rightQuietZone +
         myRatio.x + (2 * myRatio.x + 3 * myRatio.y) * contentLength);
 
-    sb.append(repeat('0', leftQuietZone));                                   // left quiet zone
+    sb.append("0".repeat(leftQuietZone));                                    // left quiet zone
     sb.append(bars[0]).append(spaces[0]).append(bars[0]).append(spaces[0]);  // start sign
 
     for (int i=0; i<contentLength; i+=2) {
@@ -89,7 +80,7 @@ public class ImplITF extends LineageTwoWidth {
     }
 
     sb.append(bars[1]).append(spaces[0]).append(bars[0]);                    // stop sign
-    sb.append(repeat('0', rightQuietZone));                                  // right quiet zone
+    sb.append("0".repeat(rightQuietZone));                                   // right quiet zone
 
     return sb;
   }
@@ -148,8 +139,7 @@ public class ImplITF extends LineageTwoWidth {
     myOptionalChecksum = appendOptionalChecksum ? "" + calculateModulo10(myContent) : null;
 
     updateHumanReadableText();
-
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 
@@ -158,6 +148,14 @@ public class ImplITF extends LineageTwoWidth {
     myText = myContent;
     if (myOptionalChecksum != null && myIsOptionalChecksumVisible)
       myText += myOptionalChecksum;
+  }
+
+
+
+  /** @hidden */
+  @Override
+  public boolean supportsRatio() {
+    return true;
   }
 
 

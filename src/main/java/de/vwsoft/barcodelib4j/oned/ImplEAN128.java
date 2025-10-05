@@ -41,10 +41,11 @@ public class ImplEAN128 extends ImplCode128 {
    * Sets the GS1 data to be encoded in the barcode.
    * <p>
    * For guidance on how to properly provide GS1 structured data, refer to the {@link GS1Validator}
-   * class documentation. This method uses an internal instance of {@code GS1Validator} to validate
-   * the provided data, so you do not need to instantiate it yourself.
+   * class documentation.
    * <p>
-   * To include FNC1 separators, the value of {@link #FNC1} should be used for GS1-128.
+   * Note: This method performs validation automatically using an internal {@code GS1Validator}
+   * instance. Therefore, there is no need to create your own {@code GS1Validator} instance or to
+   * manually validate the provided content beforehand.
    *
    * @param content                the GS1 data to be encoded in the barcode
    * @param autoComplete           has no function in this method implementation
@@ -58,7 +59,7 @@ public class ImplEAN128 extends ImplCode128 {
     GS1Validator gs1 = new GS1Validator(content, FNC1);
     myContent = FNC1 + gs1.getContent();
     myText = gs1.getText();
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 }

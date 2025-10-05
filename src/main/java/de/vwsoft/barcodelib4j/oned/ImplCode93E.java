@@ -80,7 +80,8 @@ public class ImplCode93E extends ImplCode93 {
 
     myContent = sb.toString();
     myText = content;
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 }

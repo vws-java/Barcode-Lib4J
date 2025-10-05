@@ -22,10 +22,10 @@ package de.vwsoft.barcodelib4j.oned;
 /**
  * Implementation of EAN-13 (also known as GTIN-13).
  */
-public class ImplEAN13 extends LineageUPC {
+public class ImplEAN13 extends UPCEANFamily {
 
-  private static final String BAR_LENGTH_PATTERN = repeat('1', 3) + repeat('0', 42) +
-      repeat('1', 5) + repeat('0', 42) + repeat('1', 3) + repeat('2', 7 + 47);
+  private static final String BAR_LENGTH_PATTERN = "1".repeat(3) + "0".repeat(42) +
+      "1".repeat(5) + "0".repeat(42) + "1".repeat(3) + "2".repeat(7 + 47);
 
   private static final int[] CHARSET_PATTERN = { 0, 11, 13, 14, 19, 25, 28, 21, 22, 26 };
 
@@ -86,7 +86,7 @@ public class ImplEAN13 extends LineageUPC {
     }
 
     myContent = content;
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

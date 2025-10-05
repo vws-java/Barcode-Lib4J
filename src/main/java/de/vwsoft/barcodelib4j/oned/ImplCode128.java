@@ -119,7 +119,7 @@ public class ImplCode128 extends Barcode {
     final int rightQuietZone = getQuietZoneRight();
     final StringBuilder sb = new StringBuilder(len * 15 + leftQuietZone + rightQuietZone);
 
-    sb.append(repeat('0', leftQuietZone));
+    sb.append("0".repeat(leftQuietZone));
 
     int checkSum = 0;
     int checkSumWeight = 1;
@@ -177,7 +177,7 @@ public class ImplCode128 extends Barcode {
 
     sb.append(Integer.toBinaryString(BARS[checkSum % 103]));
     sb.append("11000111010" + "11");
-    sb.append(repeat('0', rightQuietZone));
+    sb.append("0".repeat(rightQuietZone));
 
     return sb;
   }
@@ -280,7 +280,7 @@ public class ImplCode128 extends Barcode {
     }
 
     myContent = content;
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 }

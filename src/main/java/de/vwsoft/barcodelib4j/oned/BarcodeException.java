@@ -21,37 +21,40 @@ import java.util.Locale;
 
 
 /**
- * Thrown when a barcode object is assigned an invalid content that cannot be encoded by the given
- * barcode type.
+ * Exception thrown when content cannot be encoded by a barcode type.
  * <p>
- * Returns an exception ID from one of the three categories: Content, Checksum and Add-On.
- * Some IDs are for general use, while others are reserved for specific barcode types.
+ * Returns an exception ID from one of the three categories: <b>Content</b>, <b>Checksum</b>
+ * and <b>Add-On</b>. Some IDs are for general use, while others are reserved for specific
+ * barcode types.
  * <p>
- * Content related exceptions:
+ * 1. Content related exceptions:
  * <ul>
- * <li>{@link #CONTENT_EMPTY} - Indicates empty content.</li>
- * <li>{@link #CONTENT_INVALID} - States a general invalidity of the content.</li>
- * <li>{@link #CONTENT_NOT_DIGITS} - Indicates that the content contains non-digit characters.</li>
- * <li>{@link #CONTENT_NOT_ASCII} - Indicates that the content contains non-ASCII characters.</li>
- * <li>{@link #CONTENT_LENGTH_INVALID} - Indicates an invalid content length.</li>
- * <li>{@link #CONTENT_LENGTH_NOT_EVEN} - Indicates that the content length is not even.</li>
+ * <li>{@link #CONTENT_EMPTY} - Indicates empty content</li>
+ * <li>{@link #CONTENT_INVALID} - States a general invalidity of the content</li>
+ * <li>{@link #CONTENT_NOT_DIGITS} - Indicates that the content contains non-digit characters</li>
+ * <li>{@link #CONTENT_NOT_ASCII} - Indicates that the content contains non-ASCII characters</li>
+ * <li>{@link #CONTENT_LENGTH_INVALID} - Indicates an invalid content length</li>
+ * <li>{@link #CONTENT_LENGTH_NOT_EVEN} - Indicates that the content length is not even</li>
  * </ul>
- * Checksum related exceptions:
+ * 2. Checksum related exceptions:
  * <ul>
- * <li>{@link #CHECKSUM_INVALID} - Indicates an invalid checksum.</li>
+ * <li>{@link #CHECKSUM_INVALID} - Indicates an invalid checksum</li>
  * </ul>
- * Add-On related exceptions:
+ * 3. Add-On related exceptions:
  * <ul>
- * <li>{@link #ADDON_EMPTY} - Indicates empty add-on content.</li>
- * <li>{@link #ADDON_LENGTH_INVALID} - Indicates an invalid add-on length.</li>
+ * <li>{@link #ADDON_EMPTY} - Indicates empty add-on content</li>
+ * <li>{@link #ADDON_LENGTH_INVALID} - Indicates an invalid add-on length</li>
  * <li>{@link #ADDON_NOT_DIGITS} - Indicates that the add-on content contains non-digit
- *     characters.</li>
+ *     characters</li>
  * </ul>
  * <p>
  * If you prefer to determine which of the three categories an exception belongs to, rather than
- * handle each exception ID separately, you can use the three corresponding methods
- * {@link #isContentRelated()}, {@link #isChecksumRelated()} and {@link #isAddOnRelated()}
- * provided in this class.
+ * handle each exception ID separately, you can use the three corresponding methods:
+ * <ul>
+ * <li>{@link #isContentRelated()}</li>
+ * <li>{@link #isChecksumRelated()}</li>
+ * <li>{@link #isAddOnRelated()}</li>
+ * </ul>
  */
 public class BarcodeException extends Exception {
 
@@ -97,7 +100,7 @@ public class BarcodeException extends Exception {
 
 
   /**
-   * Constructs a {@code BarcodeException} with the specified ID, message, and optional inserts.
+   * Constructs a new instance with the specified ID, message, and optional inserts.
    * <p>
    * The optional {@code inserts} can be used to dynamically insert values into the message text.
    * Use "%s" as a placeholder in the message where the insert should be placed. The order of the
@@ -136,8 +139,10 @@ public class BarcodeException extends Exception {
 
 
   /**
-   * {@return the localized message for this exception} If the default locale is German, it returns
-   * the German message. Otherwise, it returns the standard message.
+   * {@return the localized message for this exception}
+   * <p>
+   * If the default locale is German, it returns the German message. Otherwise, it returns the
+   * English message.
    */
   @Override
   public String getLocalizedMessage() {

@@ -25,9 +25,6 @@ package de.vwsoft.barcodelib4j.oned;
  * Code 39 Extended is a variant of the {@link ImplCode39 Code 39} barcode format that supports
  * a broader range of characters, supporting all 128 ASCII characters.
  * <p>
- * This class extends the abstract class {@link LineageTwoWidth}, as Code 39 Extended is a type of
- * two-width barcode. See the linked class description for more information.
- * <p>
  * <b>Barcode scanner configuration:</b> Please note that Code 39 Extended is not technically
  * different from standard Code 39, so a barcode scanner cannot automatically distinguish between
  * the two. To correctly read and interpret Code 39 Extended barcodes, the scanner must be
@@ -45,6 +42,8 @@ public class ImplCode39E extends ImplCode39 {
       "+K", "+L", "+M", "+N", "+O", "+P", "+Q", "+R", "+S", "+T", "+U", "+V", "+W", "+X", "+Y",
       "+Z", "%P", "%Q", "%R", "%S", "%T" };
 
+  // Note: instance variables that exist only at runtime and store temporary data are marked as
+  // 'transient' throughout the package; this may also be useful for a possible later serialization
   private transient String myContentASCII;
 
 
@@ -87,8 +86,7 @@ public class ImplCode39E extends ImplCode39 {
     myOptionalChecksum = appendOptionalChecksum ? calculateOptionalChecksum(myContent) : null;
 
     updateHumanReadableText();
-
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

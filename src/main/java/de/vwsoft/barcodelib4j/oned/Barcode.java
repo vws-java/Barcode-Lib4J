@@ -20,30 +20,39 @@ package de.vwsoft.barcodelib4j.oned;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 /**
- * Abstract representation of a 1D barcode used as a basis for specific barcode implementations.
+ * Factory class for all 1D barcode types that also serves as their abstract superclass.
  * <p>
- * <b>Important:</b> This class provides all the necessary methods to access and manipulate
- * properties of derived classes and corresponding barcode types. The advantage of this is that
- * instances can be created simply by using one of the available static
- * {@link #newInstance(BarcodeType) newInstance} methods, rather than having to deal with specific
- * classes. For example:
+ * This class creates instances of any 1D barcode type and provides all necessary methods to access
+ * and modify the created instance's properties. Rather than having to deal with specific derived
+ * classes, instances can be created using one of the two available static
+ * {@link #newInstance(BarcodeType) newInstance} methods. Example:
  *
- * <pre>    Barcode bc = Barcode.newInstance(BarcodeType.CODE128);</pre>
+ * <pre>    Barcode bc = Barcode.newInstance(BarcodeType.CODE128);
+ *    bc.set...
+ *    bc.get...
+ *    bc.supports...
+ *    bc.draw...
+ * </pre>
  *
  * <b>Note:</b> Boolean methods of the pattern {@code "supportsXYZ"} indicate whether the barcode
- * type (not just the individual instance) supports a particular property. However, assigning an
- * unsupported property has no effect and does not throw an exception.
+ * type (not just the individual instance) supports a particular property. However, calling setter
+ * methods for unsupported properties has no effect and does not throw an exception.
  */
 public abstract class Barcode implements Cloneable {
 
-  // Growth step to gradually adjust the font size based on the barcode symbol, if requested
+  /** Increment used to gradually adjust the font size based on the barcode symbol, if requested. */
   static final float FONT_SIZE_INCREMENT = 0.1F;
+
+  /** Default width ratio (2.5:1) between wide and narrow bars in two-width barcodes. */
+  static Point DEFAULT_WIDE_NARROW_RATIO = new Point(5, 2);
 
   // The validated content, encoded in the barcode
   String myContent;
@@ -66,31 +75,32 @@ public abstract class Barcode implements Cloneable {
   // If set to 'true', the font size is automatically adjusted to the size of the barcode symbol
   boolean myIsFontSizeAdjusted;
 
+  // The width ratio between wide and narrow bars in two-width barcode types
+  Point myRatio = DEFAULT_WIDE_NARROW_RATIO;
+
   // Note: instance variables that exist only at runtime and store temporary data are marked as
   // 'transient' throughout the package; this may also be useful for a possible later serialization
 
-  // Representation of the barcode symbol as a paired list of positions and widths,
-  // taking into account quiet zones
+  // [Used for drawing] Representation of the barcode symbol as an array of [position, width] pairs,
+  // including quiet zones
   transient int[] myBars;
 
-  // Corresponds to the number of modules for barcodes without a ratio,
-  // otherwise something of a larger value
+  // [Used for drawing] Corresponds to the number of modules for barcodes without a ratio;
+  // for barcodes with a ratio, may be larger than the actual number of modules
   transient int myBarsCount;
 
-  // Factor for the conversion between module width and barcode width;
+  // [Used for drawing] Factor for the conversion between module width and barcode width;
   // equals to 'myBarsCount' for barcodes without ratio
   transient double myModuleFactor;
 
 
 
-  // Hide default constructor from JavaDoc by making it package-private
   Barcode() {}
 
 
 
   /**
-   * Creates a new instance of an implementation of this class that matches the specified barcode
-   * type.
+   * Creates a new instance of the specified barcode type.
    *
    * @param type the type of barcode to instantiate
    * @return a new instance of an implementation of the {@code Barcode} class
@@ -102,8 +112,9 @@ public abstract class Barcode implements Cloneable {
 
 
   /**
-   * Creates a new instance of an implementation of this class that matches the specified barcode
-   * type. Then sets its content using the {@link #setContent(String, boolean, boolean) setContent}
+   * Creates a new instance of the specified barcode type.
+   * <p>
+   * Then sets its content using the {@link #setContent(String, boolean, boolean) setContent}
    * method, along with parameters that determine how the content is handled.
    *
    * @param type the type of barcode to instantiate
@@ -114,7 +125,6 @@ public abstract class Barcode implements Cloneable {
    *                               appended to the barcode if the barcode type supports it
    * @return a new instance of an implementation of the {@code Barcode} class
    * @throws BarcodeException if the provided content cannot be encoded by the given barcode type
-   * @see #setContent(String content, boolean autoComplete, boolean appendOptionalChecksum)
    */
   public static Barcode newInstance(BarcodeType type, String content, boolean autoComplete,
       boolean appendOptionalChecksum)
@@ -126,7 +136,7 @@ public abstract class Barcode implements Cloneable {
 
 
 
-  // encodes the content into a binary string
+  // Encodes the content into a binary string
   abstract CharSequence encode();
 
 
@@ -163,18 +173,15 @@ public abstract class Barcode implements Cloneable {
    * </ul>
    *
    * @param content the content to be encoded in the barcode
-   *
    * @param autoComplete controls whether the content is automatically completed according to
    * certain criteria. For example, for certain barcode types, such as those that require padding or
    * formatting rules, enabling {@code autoComplete} will ensure that these requirements are met.
    * Some barcode types are forced to calculate a missing checksum. The effect of
    * {@code autoComplete} varies between barcode types.
-   *
    * @param appendOptionalChecksum applies to barcode types that may or may not contain a checksum.
    * If enabled, the checksum will be calculated and appended to the barcode. However, this
    * parameter has no effect on barcode types for which a checksum is either mandatory or not
    * provided by their specification.
-   *
    * @throws BarcodeException  if a barcode object is assigned an invalid content that cannot be
    *                           encoded by the given barcode type
    */
@@ -186,21 +193,24 @@ public abstract class Barcode implements Cloneable {
 
 
   /**
-   * {@return the raw content as encoded in the barcode} Note that depending on the given barcode
-   * type (e.g., {@link ImplCode128 Code 128} and {@link ImplEAN128 EAN-128}) the returned
-   * string may contain unreadable characters, such as ASCII values from 0 to 31 and others. For
-   * human readable text, consider using the {@link #getText()} method instead.
+   * {@return the validated raw content as encoded in the barcode}
+   * <p>
+   * Note that depending on the given barcode type (e.g., {@link ImplCode128 Code 128} and
+   * {@link ImplEAN128 EAN-128}) the returned string may contain non-printable characters, such as
+   * ASCII values from 0 to 31 and others. For human readable text, consider using the
+   * {@link #getText()} method instead.
    */
-  public final String getContent() {
+  public String getContent() {
     return myContent;
   }
 
 
 
   /**
-   * {@return whether the given barcode type supports customization of the human readable text}
+   * {@return whether the given barcode type supports customization of the automatically generated
+   * human readable text}
    *
-   * @see #setCustomText(String text)
+   * @see #setCustomText(String)
    */
   public boolean supportsCustomText() {
     return true;
@@ -210,18 +220,19 @@ public abstract class Barcode implements Cloneable {
 
   /**
    * Sets a custom text for the barcode to replace the automatically generated human readable text.
-   * This must be supported by the given barcode type.
+   * <p>
+   * This must be supported by the given barcode type. See: {@link #supportsCustomText()}
    *
    * @param text the custom text to set for the barcode
-   * @throws IllegalArgumentException if the custom text is {@code null} or empty
-   * @see #supportsCustomText()
+   * @throws NullPointerException if the custom text is {@code null}
+   * @throws IllegalArgumentException if the custom text is empty
    */
   public void setCustomText(String text) {
-    if (text == null)
-      throw new IllegalArgumentException("Custom text cannot be null");
+    Objects.requireNonNull(text, "Custom text cannot be null");
     if (text.isEmpty())
       throw new IllegalArgumentException("Custom text cannot be empty");
-    myText = text;
+    if (supportsCustomText())
+      myText = text;
   }
 
 
@@ -229,7 +240,7 @@ public abstract class Barcode implements Cloneable {
   /**
    * {@return the human readable representation of the content encoded in the barcode}
    */
-  public final String getText() {
+  public String getText() {
     return myText != null ? myText : myContent;
   }
 
@@ -237,9 +248,12 @@ public abstract class Barcode implements Cloneable {
 
   /**
    * {@return whether the given barcode type supports the addition of supplementary barcode symbols}
+   * <p>
    * This feature is specific to barcode types in the UPC family, such as {@link ImplUPCA UPC-A},
    * {@link ImplUPCE UPC-E}, {@link ImplEAN13 EAN-13}, {@link ImplEAN8 EAN-8},
    * {@link ImplISBN13 ISBN-13} and {@link ImplISMN ISMN}.
+   *
+   * @see #setAddOn(String)
    */
   public boolean supportsAddOn() {
     return false;
@@ -249,6 +263,8 @@ public abstract class Barcode implements Cloneable {
 
   /**
    * Sets the Add-On number for this barcode object.
+   * <p>
+   * This must be supported by the given barcode type. See: {@link #supportsAddOn()}
    *
    * @param addOnNumber a number consisting of either 2 or 5 digits or {@code null} (default)
    * @throws BarcodeException if the provided value does not match the expected format
@@ -275,7 +291,7 @@ public abstract class Barcode implements Cloneable {
    * @param visible {@code true} if the human readable text should be visible,
    *                {@code false} otherwise
    */
-  public final void setTextVisible(boolean visible) {
+  public void setTextVisible(boolean visible) {
     myIsTextVisible = visible;
   }
 
@@ -285,7 +301,7 @@ public abstract class Barcode implements Cloneable {
    * {@return whether the human readable representation of the content encoded in the barcode is
    * visible or whether only the barcode symbol is drawn}
    */
-  public final boolean isTextVisible() {
+  public boolean isTextVisible() {
     return myIsTextVisible;
   }
 
@@ -294,6 +310,8 @@ public abstract class Barcode implements Cloneable {
   /**
    * {@return whether the given barcode type supports placing the human readable text above the
    * barcode symbol}
+   *
+   * @see #setTextOnTop(boolean)
    */
   public boolean supportsTextOnTop() {
     return true;
@@ -302,15 +320,16 @@ public abstract class Barcode implements Cloneable {
 
 
   /**
-   * Sets whether the human readable text is to be placed above the barcode symbol. This option
-   * must be supported by the given barcode type.
+   * Sets whether the human readable text is to be placed above the barcode symbol.
+   * <p>
+   * This must be supported by the given barcode type. See: {@link #supportsTextOnTop()}
    *
    * @param onTop {@code true} to place the human readable text above the barcode symbol,
    *              {@code false} to place it below
-   * @see #supportsTextOnTop()
    */
-  public final void setTextOnTop(boolean onTop) {
-    myIsTextOnTop = onTop;
+  public void setTextOnTop(boolean onTop) {
+    if (supportsTextOnTop())
+      myIsTextOnTop = onTop;
   }
 
 
@@ -318,37 +337,40 @@ public abstract class Barcode implements Cloneable {
   /**
    * {@return whether the human readable text is placed above the barcode symbol}
    */
-  public final boolean isTextOnTop() {
+  public boolean isTextOnTop() {
     return myIsTextOnTop;
   }
 
 
 
   /**
-   * Sets the offset for the position of the human readable text relative to the barcode symbol.
+   * Sets the vertical offset for the human readable text relative to the barcode symbol.
+   * <p>
    * Positive values increase the distance between the text and the symbol, while negative values
    * decrease it.
    *
-   * @param offset the offset value for adjusting the position of the human readable text
+   * @param offset the vertical offset for the human readable text
    */
-  public final void setTextOffset(double offset) {
+  public void setTextOffset(double offset) {
     myTextOffset = offset;
   }
 
 
 
   /**
-   * {@return the offset for the position of the human readable text relative to the barcode symbol}
+   * {@return the vertical offset for the human readable text relative to the barcode symbol}
    */
-  public final double getTextOffset() {
+  public double getTextOffset() {
     return myTextOffset;
   }
 
 
 
   /**
-   * Sets the font to be used for drawing the human readable text in the barcode. If set to
-   * {@code null} (default), the font assigned to the {@code Graphics2D} context will be used.
+   * Sets the font to be used for drawing the human readable text in the barcode.
+   * <p>
+   * If set to {@code null} (default), the font assigned to the {@code Graphics2D} context will be
+   * used.
    * <p>
    * Note: If automatic font size adjustment is enabled (see
    * {@link #setFontSizeAdjusted(boolean) setFontSizeAdjusted}),
@@ -374,12 +396,14 @@ public abstract class Barcode implements Cloneable {
 
   /**
    * Sets whether the font size is to be automatically adjusted based on the size of the barcode
-   * symbol. The default is {@code false}.
+   * symbol.
+   * <p>
+   * The default is {@code false}.
    *
    * @param b {@code true} to automatically adjust the font size,
    *          {@code false} to keep the font size constant
    */
-  public final void setFontSizeAdjusted(boolean b) {
+  public void setFontSizeAdjusted(boolean b) {
     myIsFontSizeAdjusted = b;
   }
 
@@ -389,18 +413,17 @@ public abstract class Barcode implements Cloneable {
    * {@return whether the font size is automatically adjusted based on the size of the barcode
    * symbol}
    */
-  public final boolean isFontSizeAdjusted() {
+  public boolean isFontSizeAdjusted() {
     return myIsFontSizeAdjusted;
   }
 
 
 
   /**
-   * {@return whether the given barcode type supports auto-completion} The returned value indicates
-   * whether passing {@code true} as the {@code autoComplete} parameter to the
+   * {@return whether the given barcode type supports auto-completion}
+   * <p>
+   * The returned value indicates whether the {@code autoComplete} parameter in the
    * {@link #setContent(String, boolean, boolean) setContent} method has any effect.
-   *
-   * @see #setContent(String content, boolean autoComplete, boolean appendOptionalChecksum)
    */
   public boolean supportsAutoCompletion() {
     return true;
@@ -409,11 +432,10 @@ public abstract class Barcode implements Cloneable {
 
 
   /**
-   * {@return whether the given barcode type supports an optional checksum} The returned value
-   * indicates whether passing {@code true} as the {@code appendOptionalChecksum} parameter to the
+   * {@return whether the given barcode type supports an optional checksum}
+   * <p>
+   * The returned value indicates whether the {@code appendOptionalChecksum} parameter in the
    * {@link #setContent(String, boolean, boolean) setContent} method has any effect.
-   *
-   * @see #setContent(String content, boolean autoComplete, boolean appendOptionalChecksum)
    */
   public boolean supportsOptionalChecksum() {
     return false;
@@ -444,12 +466,14 @@ public abstract class Barcode implements Cloneable {
 
 
   /**
-   * {@return whether the given barcode type supports setting the ratio between the widths of the
-   * wide and narrow bars in the barcode symbol} This feature is used in two-width barcode types
-   * such as {@link ImplITF 2 of 5 Interleaved (ITF)}, {@link ImplCode39 Code 39},
+   * {@return whether the given barcode type supports setting the width ratio between
+   * wide and narrow bars in the barcode symbol}
+   * <p>
+   * This feature is used in two-width barcode types such as
+   * {@link ImplITF Interleaved 2 of 5 (ITF)}, {@link ImplCode39 Code 39},
    * {@link ImplCode11 Code 11} and {@link ImplCodabar Codabar}.
    *
-   * @see #setRatio(float ratio)
+   * @see #setRatio(float)
    */
   public boolean supportsRatio() {
     return false;
@@ -458,24 +482,39 @@ public abstract class Barcode implements Cloneable {
 
 
   /**
-   * Sets the ratio between the width of the wide bars and the width of the narrow bars in two-width
-   * barcode types. The value must be in the range 2.0F to 3.0F, corresponding to ratios of
-   * 2.0:1 to 3.0:1. If not explicitly set, the default ratio is
-   * {@link LineageTwoWidth#DEFAULT_RATIO}.
+   * Sets the width ratio between wide and narrow bars in two-width barcode types.
+   * <p>
+   * The value must be in the range 2.0F to 3.0F, corresponding to ratios of 2.0:1 to 3.0:1.
+   * Values outside this range are automatically clamped. If not explicitly set, the default
+   * ratio is 2.5:1.
+   * <p>
+   * This must be supported by the given barcode type. See: {@link #supportsRatio()}
    *
-   * @param ratio the ratio between the width of the wide bars and the width of the narrow bars
-   *              in the barcode symbol in the range 2.0F to 3.0F
+   * @param ratio width ratio between wide and narrow bars
    */
   public void setRatio(float ratio) {
+    if (supportsRatio()) {
+      int narrLen = 10;
+      int wideLen = Math.round(ratio * 10F);
+      for (int i=10; i>1; i--) {
+        if (narrLen % i == 0 && wideLen % i == 0) {
+          narrLen /= i;
+          wideLen /= i;
+          break;
+        }
+      }
+      myRatio = new Point(wideLen, narrLen);
+      invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
+    }
   }
 
 
 
   /**
-   * {@return the ratio value}
+   * {@return the width ratio between wide and narrow bars in two-width barcode types}
    */
   public float getRatio() {
-    return 0F;
+    return (float)myRatio.x / myRatio.y;
   }
 
 
@@ -498,13 +537,19 @@ public abstract class Barcode implements Cloneable {
 
 
 
+  void invalidateDrawing() {
+    myBars = null;
+  }
+
+
+
   void prepareDrawing() {
     // Get the bars and spaces of the barcode symbol as a binary string, where '1'=bar, '0'=space
     final CharSequence barsBinary = encode();
 
     // Group bars into continuous blocks for efficient drawing; build pairs of positions and widths
     final int barsBinaryLength = barsBinary.length();
-    final ArrayList<Integer> barCoords = new ArrayList<>(113); // 113 seems a reasonable value...
+    final ArrayList<Integer> barCoords = new ArrayList<>(120);
     int positionCounter = 0, widthCounter = 0;
     char barOrSpace = barsBinary.charAt(0);
     for (int i=0; i<barsBinaryLength; i++) {
@@ -528,7 +573,7 @@ public abstract class Barcode implements Cloneable {
     }
 
     // Convert ArrayList<Integer> into an int-array - for a faster access when drawing
-    final int[] bars = new int[barCoords.size()];
+    int[] bars = new int[barCoords.size()];
     for (int i=bars.length-1; i>=0; i--)
       bars[i] = barCoords.get(i);
 
@@ -696,19 +741,20 @@ public abstract class Barcode implements Cloneable {
 
 
   /**
-   * {@return a copy of this object} The copy can be considered and used as a "deep copy".
+   * {@return a copy of this object}
+   * <p>
+   * The returned copy is independent of the original and can be modified without affecting it.
+   * All instance members are either primitive or immutable types, or will be automatically
+   * rebuilt when any of the instance's properties change. Thus, the copy can be handled
+   * as if it were a "deep copy".
    */
-  public Object clone() {
-    try { return super.clone(); } catch (Exception e) { return null; }
-  }
-
-
-
-  static String repeat(char c, int count) {
-    StringBuilder sb = new StringBuilder(count);
-    for (int i=count; i!=0; i--)
-      sb.append(c);
-    return sb.toString();
+  @Override
+  public Barcode clone() {
+    try {
+      return (Barcode)super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Unexpected: Clone not supported", e);
+    }
   }
 
 

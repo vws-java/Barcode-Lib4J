@@ -31,10 +31,8 @@ package de.vwsoft.barcodelib4j.oned;
  *   <li>Special characters: plus (+), minus (-), dollar ($), slash (/), period (.),
  *     percent (%)</li>
  * </ul>
- * This class extends the abstract class {@link LineageTwoWidth}, as Code 39 is a type of
- * two-width barcode. See the linked class description for more information.
  */
-public class ImplCode39 extends LineageTwoWidth {
+public class ImplCode39 extends Barcode {
 
   private static final String CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%*";
   private static final int[] BARS = { 52, 289, 97, 352, 49, 304, 112, 37, 292, 100, 265, 73, 328,
@@ -56,6 +54,14 @@ public class ImplCode39 extends LineageTwoWidth {
     try {
       setContent(content, false, false);
     } catch (BarcodeException ex) {}
+  }
+
+
+
+  /** @hidden */
+  @Override
+  public boolean supportsRatio() {
+    return true;
   }
 
 
@@ -92,8 +98,8 @@ public class ImplCode39 extends LineageTwoWidth {
       content += myOptionalChecksum;
     content = '*' + content + '*';
 
-    final String[] narr = { repeat('1', myRatio.y), repeat('0', myRatio.y) };
-    final String[] wide = { repeat('1', myRatio.x), repeat('0', myRatio.x) };
+    final String[] narr = { "1".repeat(myRatio.y), "0".repeat(myRatio.y) };
+    final String[] wide = { "1".repeat(myRatio.x), "0".repeat(myRatio.x) };
 
     final int leftQuietZone = getQuietZoneLeft() * myRatio.y;
     final int rightQuietZone = getQuietZoneRight() * myRatio.y;
@@ -101,7 +107,7 @@ public class ImplCode39 extends LineageTwoWidth {
     StringBuilder sb = new StringBuilder((3 * myRatio.x + (6 + 1) * myRatio.y) * content.length() +
         leftQuietZone + rightQuietZone);
 
-    sb.append(repeat('0', leftQuietZone));
+    sb.append("0".repeat(leftQuietZone));
     final int k = content.length() - 1;
     for (int i=0; i<=k; i++) {
       int barMask = BARS[CHARS.indexOf(content.charAt(i))];
@@ -110,7 +116,7 @@ public class ImplCode39 extends LineageTwoWidth {
       if (i < k)
         sb.append(narr[1]);
     }
-    sb.append(repeat('0', rightQuietZone));
+    sb.append("0".repeat(rightQuietZone));
 
     return sb;
   }
@@ -128,11 +134,14 @@ public class ImplCode39 extends LineageTwoWidth {
 
   /**
    * Sets the content to be encoded in the barcode.
+   * <p>
+   * The content is validated against the allowed character set. If {@code autoComplete} is enabled,
+   * lowercase letters are automatically converted to uppercase. If {@code appendOptionalChecksum}
+   * is enabled, a modulo 43 checksum is calculated and appended.
    *
    * @param content                the content to be encoded in the Code 39 barcode
-   * @param autoComplete           whether to automatically convert lowercase letters
-   *                               in the content to uppercase letters
-   * @param appendOptionalChecksum whether to append an optional checksum to the content
+   * @param autoComplete           whether to convert lowercase letters to uppercase letters
+   * @param appendOptionalChecksum whether to append an optional modulo 43 checksum
    * @throws BarcodeException      if the content is empty or contains invalid characters
    */
   @Override
@@ -153,8 +162,7 @@ public class ImplCode39 extends LineageTwoWidth {
     myOptionalChecksum = appendOptionalChecksum ? calculateOptionalChecksum(myContent) : null;
 
     updateHumanReadableText();
-
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

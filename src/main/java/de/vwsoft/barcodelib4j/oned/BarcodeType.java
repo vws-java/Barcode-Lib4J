@@ -20,82 +20,40 @@ package de.vwsoft.barcodelib4j.oned;
 
 
 /**
- * Enumeration of all supported 1D barcode types sorted by type name in alphabetical order.
+ * Enumeration of all supported 1D barcode types ordered alphabetically by type name.
  * <p>
- * Each barcode type has a unique integer ID which can optionally be used for efficient storage in a
- * file or database (e.g. as a byte type). See {@link #getID()} and {@link #valueOf(int id)}.
+ * Each barcode type has a unique integer ID which can be used for efficient storage in a file or
+ * database. The IDs are small positive integers that can be safely cast to byte if needed.
+ * See {@link #getID()} and {@link #valueOf(int id)}.
  */
 public enum BarcodeType {
 
-  /** Barcode type "Codabar" */
-  CODABAR  ("Codabar",                7),
-
-  /** Barcode type "Code 11" */
-  CODE11   ("Code 11",               12),
-
-  /** Barcode type "Code 128" */
-  CODE128  ("Code 128",               6),
-
-  /** Barcode type "Code 128 A" */
-  CODE128A ("Code 128 A",            20),
-
-  /** Barcode type "Code 128 B" */
-  CODE128B ("Code 128 B",             8),
-
-  /** Barcode type "Code 128 C" */
-  CODE128C ("Code 128 C",             9),
-
-  /** Barcode type "Code 39" */
-  CODE39   ("Code 39",                5),
-
-  /** Barcode type "Code 39 Extended" */
-  CODE39E  ("Code 39 Extended",      13),
-
-  /** Barcode type "Code 93" */
-  CODE93   ("Code 93",               10),
-
-  /** Barcode type "Code 93 Extended" */
-  CODE93E  ("Code 93 Extended",      11),
-
-  /** Barcode type "EAN-13 (GTIN-13)" */
-  EAN13    ("EAN-13 (GTIN-13)",       1),
-
-  /** Barcode type "EAN-14 (GTIN-14)" */
-  EAN14    ("EAN-14 (GTIN-14)",      18),
-
-  /** Barcode type "EAN-8 (GTIN-8)" */
-  EAN8     ("EAN-8 (GTIN-8)",         2),
-
-  /** Barcode type "GS1-128 (UCC/EAN-128)" */
-  EAN128   ("GS1-128 (UCC/EAN-128)", 17),
-
-  /** Barcode type "Interleaved 2 of 5" */
-  ITF      ("Interleaved 2 of 5",     4),
-
-  /** Barcode type "ISBN-13" */
-  ISBN13   ("ISBN-13",               15),
-
-  /** Barcode type "ISMN" */
-  ISMN     ("ISMN",                  21),
-
-  /** Barcode type "PZN" */
-  PZN      ("PZN",                   14),
-
-  /** Barcode type "PZN8" */
-  PZN8     ("PZN8",                  16),
-
-  /** Barcode type "SSCC-18 (NVE/EAN-18)" */
-  SSCC18   ("SSCC-18 (NVE/EAN-18)",  19),
-
-  /** Barcode type "UPC-A" */
-  UPCA     ("UPC-A",                  3),
-
-  /** Barcode type "UPC-E" */
-  UPCE     ("UPC-E",                 22);
+  /** Barcode type "Codabar" */                CODABAR  ("Codabar",                7),
+  /** Barcode type "Code 11" */                CODE11   ("Code 11",               12),
+  /** Barcode type "Code 128" */               CODE128  ("Code 128",               6),
+  /** Barcode type "Code 128 A" */             CODE128A ("Code 128 A",            20),
+  /** Barcode type "Code 128 B" */             CODE128B ("Code 128 B",             8),
+  /** Barcode type "Code 128 C" */             CODE128C ("Code 128 C",             9),
+  /** Barcode type "Code 39" */                CODE39   ("Code 39",                5),
+  /** Barcode type "Code 39 Extended" */       CODE39E  ("Code 39 Extended",      13),
+  /** Barcode type "Code 93" */                CODE93   ("Code 93",               10),
+  /** Barcode type "Code 93 Extended" */       CODE93E  ("Code 93 Extended",      11),
+  /** Barcode type "EAN-13 (GTIN-13)" */       EAN13    ("EAN-13 (GTIN-13)",       1),
+  /** Barcode type "EAN-14 (GTIN-14)" */       EAN14    ("EAN-14 (GTIN-14)",      18),
+  /** Barcode type "EAN-8 (GTIN-8)" */         EAN8     ("EAN-8 (GTIN-8)",         2),
+  /** Barcode type "GS1-128 (UCC/EAN-128)" */  EAN128   ("GS1-128 (UCC/EAN-128)", 17),
+  /** Barcode type "Interleaved 2 of 5" */     ITF      ("Interleaved 2 of 5",     4),
+  /** Barcode type "ISBN-13" */                ISBN13   ("ISBN-13",               15),
+  /** Barcode type "ISMN" */                   ISMN     ("ISMN",                  21),
+  /** Barcode type "PZN" */                    PZN      ("PZN",                   14),
+  /** Barcode type "PZN8" */                   PZN8     ("PZN8",                  16),
+  /** Barcode type "SSCC-18 (NVE/EAN-18)" */   SSCC18   ("SSCC-18 (NVE/EAN-18)",  19),
+  /** Barcode type "UPC-A" */                  UPCA     ("UPC-A",                  3),
+  /** Barcode type "UPC-E" */                  UPCE     ("UPC-E",                 22);
 
 
 
-  private String myTypeName;
+  private final String myTypeName;
   private final int myID;
 
 
@@ -140,6 +98,9 @@ public enum BarcodeType {
 
 
 
+  // This static cache helps to avoid repeated array creation that occurs internally in 'values()'.
+  // The constant is used only by the 'valueOf(int)' method and is therefore declared next to it.
+  private static final BarcodeType[] cachedValues = values();
   /**
    * Returns the enum constant of this class associated with the specified integer ID.
    *
@@ -149,7 +110,7 @@ public enum BarcodeType {
    *                                   with the specified ID
    */
   public static BarcodeType valueOf(int id) {
-    for (BarcodeType type : values())
+    for (BarcodeType type : cachedValues)
       if (type.getID() == id)
         return type;
     throw new IllegalArgumentException("Invalid barcode type ID: " + id);
@@ -169,19 +130,6 @@ public enum BarcodeType {
 
 
   /**
-   * Sets a custom name for this barcode type. This method allows it to customize the displayed
-   * names of barcode types as needed. For example, an alternative name like "ITF" can be set
-   * instead of "Interleaved 2 of 5" and so on.
-   *
-   * @param typeName the new name for this barcode type
-   */
-  public void setTypeName(String typeName) {
-    myTypeName = typeName;
-  }
-
-
-
-  /**
    * {@return the name of this barcode type}
    */
   public String getTypeName() {
@@ -191,11 +139,10 @@ public enum BarcodeType {
 
 
   /**
-   * {@return a shortened version of the name of this barcode type} If there is a part enclosed in
-   * parentheses, it is truncated. For example, if the type name is "EAN-13 (GTIN-13)", this method
-   * will return "EAN-13".
+   * {@return a shortened version of the name of this barcode type}
    * <p>
-   * This method is provided for convenience.
+   * If there is a part enclosed in parentheses, it is truncated. For example, if the type name is
+   * "EAN-13 (GTIN-13)", this method will return "EAN-13".
    */
   public String getTypeNameShort() {
     int pos = myTypeName.indexOf('(');
@@ -205,7 +152,9 @@ public enum BarcodeType {
 
 
   /**
-   * {@return the name of this barcode type} Equivalent to {@link #getTypeName()}.
+   * {@return the name of this barcode type}
+   * <p>
+   * Equivalent to {@link #getTypeName()}.
    */
   @Override
   public String toString() {

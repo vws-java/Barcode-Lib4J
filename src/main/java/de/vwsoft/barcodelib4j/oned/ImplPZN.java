@@ -32,8 +32,7 @@ package de.vwsoft.barcodelib4j.oned;
  * end. For example:
  * <pre>    PZN -1234562</pre>
  * PZN is not a standalone barcode type but uses the {@link ImplCode39 Code 39} format to encode its
- * data. As a result, this class extends the abstract class {@link LineageTwoWidth}, as Code 39 is a
- * type of two-width barcode. See the linked class description for more information.
+ * data.
  */
 public class ImplPZN extends ImplCode39 {
 
@@ -109,8 +108,7 @@ public class ImplPZN extends ImplCode39 {
     myContent = '-' + content;
 
     updateHumanReadableText();
-
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

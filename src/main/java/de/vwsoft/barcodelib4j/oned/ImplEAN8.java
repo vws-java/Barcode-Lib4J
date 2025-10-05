@@ -22,10 +22,10 @@ package de.vwsoft.barcodelib4j.oned;
 /**
  * Implementation of EAN-8 (also known as GTIN-8).
  */
-public class ImplEAN8 extends LineageUPC {
+public class ImplEAN8 extends UPCEANFamily {
 
-  private static final String BAR_LENGTH_PATTERN = repeat('1', 3) + repeat('0', 28) +
-      repeat('1', 5) + repeat('0', 28) + repeat('1', 3) + repeat('2', 7 + 47);
+  private static final String BAR_LENGTH_PATTERN = "1".repeat(3) + "0".repeat(28) +
+      "1".repeat(5) + "0".repeat(28) + "1".repeat(3) + "2".repeat(7 + 47);
 
 
 
@@ -78,7 +78,7 @@ public class ImplEAN8 extends LineageUPC {
     }
 
     myContent = content;
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

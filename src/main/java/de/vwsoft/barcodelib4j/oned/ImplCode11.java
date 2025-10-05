@@ -25,13 +25,10 @@ package de.vwsoft.barcodelib4j.oned;
  * Code 11 is a numeric barcode format that encodes digits (0-9) and the hyphen (-). It is used
  * primarily in telecommunications.
  * <p>
- * This class extends the abstract class {@link LineageTwoWidth}, as Code 11 is a type of two-width
- * barcode. See the linked class description for more information.
- * <p>
  * Code 11 can be used with an optional checksum. Unlike most other barcode types, the checksum in
  * Code 11 is composed of two characters.
  */
-public class ImplCode11 extends LineageTwoWidth {
+public class ImplCode11 extends Barcode {
 
   private static final String CHARS = "0123456789-";
   private static final int[] BARS = { 1, 17, 9, 24, 5, 20, 12, 3, 18, 16, 4 };
@@ -45,6 +42,14 @@ public class ImplCode11 extends LineageTwoWidth {
     try {
       setContent("1234-5678", false, false);
     } catch (BarcodeException ex) {}
+  }
+
+
+
+  /** @hidden */
+  @Override
+  public boolean supportsRatio() {
+    return true;
   }
 
 
@@ -87,8 +92,8 @@ public class ImplCode11 extends LineageTwoWidth {
     final String content = myOptionalChecksum != null ? myContent + myOptionalChecksum : myContent;
     final int len = content.length();
 
-    final String[] bars   = { repeat('1', myRatio.y), repeat('1', myRatio.x) };
-    final String[] spaces = { repeat('0', myRatio.y), repeat('0', myRatio.x) };
+    final String[] bars   = { "1".repeat(myRatio.y), "1".repeat(myRatio.x) };
+    final String[] spaces = { "0".repeat(myRatio.y), "0".repeat(myRatio.x) };
 
     final String startAndStop = bars[0] + spaces[0] + bars[1] + spaces[1] + bars[0];
 
@@ -101,7 +106,7 @@ public class ImplCode11 extends LineageTwoWidth {
         myRatio.y +
         leftQuietZone + rightQuietZone);
 
-    sb.append(repeat('0', leftQuietZone));
+    sb.append("0".repeat(leftQuietZone));
     sb.append(startAndStop);
     sb.append(spaces[0]); // first intercharacter space
     for (int i=0; i<len; i++) {
@@ -114,7 +119,7 @@ public class ImplCode11 extends LineageTwoWidth {
       sb.append(  spaces[0]             );  // intercharacter space
     }
     sb.append(startAndStop);
-    sb.append(repeat('0', rightQuietZone));
+    sb.append("0".repeat(rightQuietZone));
 
     return sb;
   }
@@ -169,8 +174,7 @@ public class ImplCode11 extends LineageTwoWidth {
     myOptionalChecksum = appendOptionalChecksum ? calculateOptionalChecksum(myContent) : null;
 
     updateHumanReadableText();
-
-    myBars = null; // Reset bars to trigger recalculation next time drawing occurs
+    invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 
 

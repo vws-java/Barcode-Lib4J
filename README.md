@@ -5,8 +5,7 @@
 
   [![GitHub release](https://img.shields.io/github/release/vws-java/Barcode-Lib4J.svg)](https://github.com/vws-java/Barcode-Lib4J/releases)
   [![Maven Central](https://img.shields.io/maven-central/v/de.vwsoft/barcodelib4j.svg)](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
-  [![Java](https://img.shields.io/badge/Java-9%2B-blue.svg)](https://www.oracle.com/java/)
-  [![Javadoc](https://img.shields.io/badge/Javadoc-API%20Docs-blue.svg)](https://www.vw-software.com/barcode-lib4j-docs/index.html)
+  [![Java](https://img.shields.io/badge/Java-11%2B-blue.svg)](https://www.oracle.com/java/)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 </div>
@@ -34,7 +33,6 @@
 - Configurable bar width ratio from 2:1 to 3:1 for barcode types that support this feature: Interleaved 2 of 5, Code 39 and others
 - Add-Ons 2 or 5 for the barcode types EAN-13, EAN-8, UPC-A, UPC-E, ISBN-13 and ISMN; second plain text line for ISBN-13 and ISMN
 - **Comprehensive support for GS1-128, GS1 DataMatrix and GS1 QR Code:** Verification of data integrity such as correctness of application identifiers, length and format of individual data elements, verification/calculation of the check digit in SSCC and GTIN and more
-- Lightweight architecture: Compiles to a single small JAR file (~300KB); Has only one dependency (OpenPDF for PDF export), fully optional at compile and runtime
 <br>
 
 ## Image Output Formats
@@ -64,64 +62,19 @@
 <br>
 
 ## Required Java Version & Dependencies
-- Minimum Java Version: 9
-- Optional: OpenPDF version 1.3.0 to 2.4.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used version is compatible with your Java version! Also note that version 3.0.0 and higher is **not compatible** with Barcode-Lib4J.
+- Minimum Java Version: 11
+- Optional: OpenPDF version 1.3.0 to 3.0.0 is needed for PDF export - [GitHub](https://github.com/LibrePDF/OpenPDF) | [Maven Central](https://central.sonatype.com/artifact/com.github.librepdf/openpdf) - Please ensure the used version is compatible with your Java version!
 <br>
 
-## Installation
-**Maven:**
-```xml
-<dependency>
-    <groupId>de.vwsoft</groupId>
-    <artifactId>barcodelib4j</artifactId>
-    <version>2.0.2</version>
-</dependency>
-```
-**Gradle:**
-```gradle
-implementation 'de.vwsoft:barcodelib4j:2.0.2'
-```
-**Alternative methods:**
-- Add the dependency to other build tools and/or browse all versions: [Maven Central](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
-- Directly download Java sources, Javadoc, and a precompiled JAR: [GitHub Releases](../../releases)
+## Get Started
+Find this on the official Barcode-Lib4J project site: &nbsp; [ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)
 
-<br>
-
-## Getting Started
-### RECOMMENDED: Best Practices & Examples
-Follow best practices for **reliable, scannable barcodes** and avoid common pitfalls &ndash; including proper DPI handling for printing and raster image generation, RGB vs. CMYK color choice, and validation of Application Identifiers and data elements for GS1 barcodes (GS1-128, GS1 DataMatrix, GS1 QR Code) &ndash; in our [Essential Tutorial & Examples](https://www.vw-software.com/java-barcode-library/#get-started)
-
-### Quick Start Example &ndash; Generating a QR Code as SVG and EPS (CMYK)
-```java
-import java.awt.*;
-import java.io.*;
-import de.vwsoft.barcodelib4j.image.*;
-import de.vwsoft.barcodelib4j.twod.*;
-
-
-public class QRCodeExample {
-  public static void main(String[] args) throws Exception {
-    final double sizeMM = 40.0; // QR Code size: 40x40 millimeters
-
-    TwoDCode tdc = new TwoDCode(); // Defaults to QR Code
-    tdc.setContent("Barcode-Lib4J Demo");
-
-    ImageCreator imageCreator = new ImageCreator(sizeMM, sizeMM);
-    Graphics2D g2d = imageCreator.getGraphics2D();
-    tdc.buildSymbol().draw(g2d, 0.0, 0.0, sizeMM, sizeMM);
-
-    try (FileOutputStream svgOut = new FileOutputStream("sample-qrcode.svg");
-         FileOutputStream epsOut = new FileOutputStream("sample-qrcode.eps")) {
-      imageCreator.writeSVG(svgOut);
-      imageCreator.writeEPS(epsOut, ImageCreator.COLORSPACE_CMYK);
-    }
-  }
-}
-```
-<div align="center">
-  <p><strong>Resulting QR Code:</strong></p>
-  <img width="567" height="567" style="width:40mm;height:40mm" src="https://github.com/user-attachments/assets/1916ab09-4004-4ef2-bc27-135263d3cc87" alt="Generated QR Code Example">
-</div>
+- 📦 **Installation Guide** - Maven and Gradle dependency snippets
+- 🧑‍💻 **Quick Start Examples** - For 1D and 2D barcodes in RGB & CMYK, vector & raster
+- 🏷️ **GS1 Examples** - For GS1-128, GS1 DataMatrix, and GS1 QR Code
+- 💡 **Best Practices** - Produce reliable, scannable barcodes and avoid common pitfalls
+- 📏 **Quality Guidelines** - DPI handling and resolution optimization for quality output
+- 📖 **API Documentation** - Detailed Javadocs and method references
 
 <br>
 <br>

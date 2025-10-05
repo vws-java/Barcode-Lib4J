@@ -45,13 +45,14 @@ public class CompoundColor extends Color {
   public static final CompoundColor CC_WHITE = new CompoundColor(0xFFFFFF, 0x00000000);
 
   /** The CMYK color value. The value for RGB is stored in the java.awt.Color superclass. */
-  private int myCMYKColor;
+  private final int myCMYKColor;
 
 
 
   /**
-   * Constructs a new instance with the specified RGB and CMYK values. No conversion
-   * between RGB and CMYK color models takes place.
+   * Constructs a new instance with the specified RGB and CMYK values.
+   * <p>
+   * No conversion between RGB and CMYK color models takes place.
    *
    * @param r the red component of the RGB color (0-255)
    * @param g the green component of the RGB color (0-255)
@@ -60,50 +61,61 @@ public class CompoundColor extends Color {
    * @param m the magenta component of the CMYK color (0-100)
    * @param y the yellow component of the CMYK color (0-100)
    * @param k the key (black) component of the CMYK color (0-100)
+   * @throws IllegalArgumentException if RGB values are outside of the range 0 to 255
+   *                                  or CMYK values are outside of the range 0 to 100
    */
   public CompoundColor(int r, int g, int b, int c, int m, int y, int k) {
     super(r, g, b, 255);
+    testColorValueRange(c, m, y, k);
     myCMYKColor = toInteger(c, m, y, k);
   }
 
 
 
   /**
-   * Constructs a new instance with the specified RGB and CMYK values. No conversion
-   * between RGB and CMYK color models takes place.
+   * Constructs a new instance with the specified RGB and CMYK values.
+   * <p>
+   * No conversion between RGB and CMYK color models takes place.
    *
    * @param rgb the RGB value of the color
    * @param cmyk the CMYK value of the color
+   * @throws IllegalArgumentException if CMYK component values are outside of the range 0 to 100
    */
   public CompoundColor(int rgb, int cmyk) {
     super(rgb);
-    myCMYKColor = cmyk;
+    myCMYKColor = testColorValueRange(cmyk);
   }
 
 
 
   /**
-   * Constructs a new instance with the specified RGB and CMYK values. No conversion
-   * between RGB and CMYK color models takes place. The RGB value must occupy the higher 32 bits of
-   * the {@code long} parameter, while the CMYK value must occupy the lower 32 bits.
+   * Constructs a new instance with the specified RGB and CMYK values.
+   * <p>
+   * No conversion between RGB and CMYK color models takes place.
+   * <p>
+   * The RGB value must occupy the higher 32 bits of the {@code long} parameter, while the CMYK
+   * value must occupy the lower 32 bits as produced by {@link #getRGBandCMYK()}.
    *
    * @param rgbAndCmyk a {@code long} value representing both the RGB and CMYK colors
-   * @see #getRGBandCMYK()
+   * @throws IllegalArgumentException if CMYK component values are outside of the range 0 to 100
    */
   public CompoundColor(long rgbAndCmyk) {
     super((int)(rgbAndCmyk >> 32));
-    myCMYKColor = (int)rgbAndCmyk;
+    myCMYKColor = testColorValueRange((int)rgbAndCmyk);
   }
 
 
 
   /**
-   * Constructs a new instance with the specified RGB values. The CMYK values are
-   * calculated internally from the given RGB values, striving for the closest approximation.
+   * Constructs a new instance with the specified RGB values.
+   * <p>
+   * The CMYK values are calculated internally from the given RGB values, striving for the closest
+   * approximation.
    *
    * @param r the red component of the RGB color (0-255)
    * @param g the green component of the RGB color (0-255)
    * @param b the blue component of the RGB color (0-255)
+   * @throws IllegalArgumentException if RGB values are outside of the range 0 to 255
    */
   public CompoundColor(int r, int g, int b) {
     super(r, g, b, 255);
@@ -113,24 +125,30 @@ public class CompoundColor extends Color {
 
 
   /**
-   * Constructs a new instance with the specified CMYK values. The RGB values are
-   * calculated internally from the given CMYK values, striving for the closest approximation.
+   * Constructs a new instance with the specified CMYK values.
+   * <p>
+   * The RGB values are calculated internally from the given CMYK values, striving for the closest
+   * approximation.
    *
    * @param c the cyan component of the CMYK color (0-100)
    * @param m the magenta component of the CMYK color (0-100)
    * @param y the yellow component of the CMYK color (0-100)
    * @param k the key (black) component of the CMYK color (0-100)
+   * @throws IllegalArgumentException if CMYK values are outside of the range 0 to 100
    */
   public CompoundColor(int c, int m, int y, int k) {
     super(toRGB(c, m, y, k), true);
+    testColorValueRange(c, m, y, k);
     myCMYKColor = toInteger(c, m, y, k);
   }
 
 
 
   /**
-   * Constructs a new instance with the specified {@code java.awt.Color}. The CMYK values are
-   * calculated internally from the given RGB values, striving for the closest approximation.
+   * Constructs a new instance with the specified {@code java.awt.Color}.
+   * <p>
+   * The CMYK values are calculated internally from the given RGB values, striving for the closest
+   * approximation.
    *
    * @param rgbColor  the {@code java.awt.Color} object from which to construct the
    *                  {@code CompoundColor}
@@ -143,8 +161,11 @@ public class CompoundColor extends Color {
 
 
   /**
-   * Constructs a new instance with the specified value. If {@code isRGB} is
-   * {@code true}, the integer value represents an RGB color, otherwise, it represents a CMYK color.
+   * Constructs a new instance with the specified value.
+   * <p>
+   * If {@code isRGB} is {@code true}, the integer value represents an RGB color, otherwise, it
+   * represents a CMYK color.
+   * <p>
    * The CMYK values are calculated internally if the integer value represents an RGB color, or the
    * RGB values are calculated internally if the integer value represents a CMYK color, striving for
    * the closest approximation.
@@ -152,17 +173,20 @@ public class CompoundColor extends Color {
    * @param value the integer value representing either an RGB or CMYK color
    * @param isRGB {@code true} if the value represents an RGB color, {@code false} if it represents
    *              a CMYK color
+   * @throws IllegalArgumentException if {@code isRGB} is {@code false} and CMYK component values
+   *                                  are outside of the range 0 to 100
    */
   public CompoundColor(int value, boolean isRGB) {
     super(isRGB ? value : toRGB(value));
-    myCMYKColor = isRGB ? toCMYK(value) : value;
+    myCMYKColor = isRGB ? toCMYK(value) : testColorValueRange(value);
   }
 
 
 
   /**
-   * {@return a {@code long} value representing both the RGB and CMYK colors} The RGB value
-   * occupies the higher 32 bits and the CMYK value occupies the lower 32 bits.
+   * {@return a {@code long} value representing both the RGB and CMYK colors}
+   * <p>
+   * The RGB value occupies the higher 32 bits and the CMYK value occupies the lower 32 bits.
    */
   public long getRGBandCMYK() {
     return ((long)getRGB() << 32) | myCMYKColor;
@@ -171,9 +195,11 @@ public class CompoundColor extends Color {
 
 
   /**
-   * {@return the CMYK color value} The cyan component occupies the higher 8 bits, the magenta
-   * component occupies the next 8 bits, the yellow component occupies the next 8 bits, and the
-   * key (black) component occupies the lower 8 bits.
+   * {@return the CMYK color value}
+   * <p>
+   * The cyan component occupies the higher 8 bits, the magenta component occupies the next 8 bits,
+   * the yellow component occupies the next 8 bits, and the key (black) component occupies the lower
+   * 8 bits.
    */
   public int getCMYK() {
     return myCMYKColor;
@@ -228,9 +254,10 @@ public class CompoundColor extends Color {
 
 
   /**
-   * Determines whether another object is equal to this {@code CompoundColor}. The result is
-   * {@code true} if and only if the argument is not {@code null} and is a {@code CompoundColor}
-   * object that has the same RGB and CMYK values as this object.
+   * Determines whether another object is equal to this {@code CompoundColor}.
+   * <p>
+   * The result is {@code true} if and only if the argument is not {@code null} and is a
+   * {@code CompoundColor} object that has the same RGB and CMYK values as this object.
    *
    * @param obj  the object to test for equality with this {@code CompoundColor}
    * @return     {@code true} if the objects are the same, {@code false} otherwise
@@ -247,13 +274,45 @@ public class CompoundColor extends Color {
 
 
   /**
-   * {@return a string representation of this {@code CompoundColor}} This method is intended to be
-   * used only for debugging purposes.
+   * {@return a string representation of this {@code CompoundColor}}
+   * <p>
+   * This method is intended to be used only for debugging purposes.
    */
   @Override
   public String toString() {
     return getClass().getName() + "[r=" + getRed() + ",g=" + getGreen() + ",b=" + getBlue() + "]" +
         "[c=" + getCyan() + ",m=" + getMagenta() + ",y=" + getYellow() + ",k=" + getKey() + "]";
+  }
+
+
+
+  // Produces similar error messages as java.awt.Color.testColorValueRange
+  private static void testColorValueRange(int c, int m, int y, int k) {
+    String badComponentString = "";
+
+    if (c < 0 || c > 100)
+      badComponentString += " Cyan";
+    if (m < 0 || m > 100)
+      badComponentString += " Magenta";
+    if (y < 0 || y > 100)
+      badComponentString += " Yellow";
+    if (k < 0 || k > 100)
+      badComponentString += " Black";
+
+    if (!badComponentString.isEmpty())
+      throw new IllegalArgumentException(
+          "Color parameter outside of expected range:" + badComponentString);
+  }
+
+
+
+  // Validates a packed CMYK value (8 bits per component)
+  private static int testColorValueRange(int cmykColor) {
+    testColorValueRange((cmykColor >> 24),
+                        (cmykColor >> 16) & 0xFF,
+                        (cmykColor >>  8) & 0xFF,
+                        (cmykColor      ) & 0xFF);
+    return cmykColor;
   }
 
 

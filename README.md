@@ -66,7 +66,7 @@
 <br>
 
 ## Get Started
-Find this on the official Barcode-Lib4J project site: &nbsp; <b>[ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)</b>
+Find these on the official project site: &nbsp; <b>[ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)</b>
 
 - 📦 **Installation Guide** - Maven and Gradle dependency snippets
 - 🧑‍💻 **Quick Start Examples** - For 1D and 2D barcodes in RGB & CMYK, vector & raster

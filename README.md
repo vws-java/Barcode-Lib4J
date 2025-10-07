@@ -73,7 +73,7 @@
 - 📏 **Quality Guidelines** - DPI handling and resolution optimization for quality output
 - 📖 **API Documentation** - Detailed Javadocs and method references
 
-**→ Available in:** &nbsp; <b>[ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)</b>
+**➜ Available in:** &nbsp;<b>[ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)</b>
 
 <br>
 <br>

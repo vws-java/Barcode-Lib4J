@@ -65,15 +65,15 @@
 - Optional: [OpenPDF](https://github.com/LibrePDF/OpenPDF) version 1.3.0 to 3.0.0 is needed for PDF export - Please ensure the used version is compatible with your Java version!
 <br>
 
-## Get Started
-Continue on the official project site: &nbsp; <b>[ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)</b>
-
+## Get Started &ndash; Maven and Gradle, Examples, Best Practices
 - 📦 **Installation Guide** - Maven and Gradle dependency snippets
 - 🧑‍💻 **Quick Start Examples** - For 1D and 2D barcodes in RGB & CMYK, vector & raster
 - 🏷️ **GS1 Examples** - For GS1-128, GS1 DataMatrix, and GS1 QR Code
 - 💡 **Best Practices** - Produce reliable, scannable barcodes and avoid common pitfalls
 - 📏 **Quality Guidelines** - DPI handling and resolution optimization for quality output
 - 📖 **API Documentation** - Detailed Javadocs and method references
+
+**Continue on the official project site:** &nbsp; <b>[ENGLISH](https://www.vw-software.com/java-barcode-library/#get-started) &nbsp;|&nbsp; [GERMAN](https://www.vwsoft.de/barcode-library-for-java/#get-started)</b>
 
 <br>
 <br>

@@ -24,7 +24,7 @@
 
 ## Features
 - Drawing and printing of 1D and 2D barcodes using Java 2D (java.awt.Graphics2D)
-- Vector and raster image export with full support for format-specific features such as color models (CMYK, RGB), transparency, high coordinate precision, optional embedded preview (EPS), DPI handling, and PDF/X-compliant output for print-ready PDFs
+- Vector and raster image export with full support for format-specific features such as color models (CMYK, RGB), transparency, high coordinate precision, optional embedded preview (EPS), and DPI handling
 - **Adjustment of bar widths to printer resolution (important for ensuring proper barcode quality at resolutions ≤ 600 dpi)**
 - Bar width reduction/correction (useful to account for ink spread in inkjet printers)
 - Customizable plain text line: font, size, spacing and editable content; Optional automatic font size adjustment; Additionally, the plain text line can be positioned at the top, bottom or completely hidden
@@ -43,7 +43,6 @@
 | **PNG** | Raster | - | ✓ | ✓ |
 | **BMP** | Raster | - | ✓ | - |
 | **JPG** | Raster | - | ✓ | - |
-- **PDF**: Compliance with PDF/X-1a:2001 for color-accurate printing in CMYK as well as PDF/X-3:2002 for RGB colors
 - **EPS**: Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter
 - **PDF, EPS, SVG**: Coordinates are stored with up to six decimal places for high precision
 - **PNG, BMP, JPG**: DPI resolution is stored in the file header, thereby preserving both the target resolution and the original dimensions of the graphic for later printing; No aliasing, distortion or other unwanted artifacts

@@ -161,4 +161,64 @@ public enum BarcodeType {
     return myTypeName;
   }
 
+
+
+  private Barcode myPrototypeInstance;
+  private Barcode getPrototype() {
+    if (myPrototypeInstance == null)
+      myPrototypeInstance = newInstance();
+    return myPrototypeInstance;
+  }
+  /**
+   * {@return whether this barcode type supports customization of the automatically generated
+   * human readable text}
+   *
+   * @see Barcode#setCustomText(String)
+   */
+  public boolean supportsCustomText() { return getPrototype().supportsCustomText(); }
+  /**
+   * {@return whether this barcode type supports the addition of supplementary barcode symbols}
+   * <p>
+   * This feature is specific to barcode types in the UPC family, such as {@link ImplUPCA UPC-A},
+   * {@link ImplUPCE UPC-E}, {@link ImplEAN13 EAN-13}, {@link ImplEAN8 EAN-8},
+   * {@link ImplISBN13 ISBN-13} and {@link ImplISMN ISMN}.
+   *
+   * @see Barcode#setAddOn(String)
+   */
+  public boolean supportsAddOn() { return getPrototype().supportsAddOn(); }
+  /**
+   * {@return whether this barcode type supports placing the human readable text above the
+   * barcode symbol}
+   *
+   * @see Barcode#setTextOnTop(boolean)
+   */
+  public boolean supportsTextOnTop() { return getPrototype().supportsTextOnTop(); }
+  /**
+   * {@return whether this barcode type supports setting the width ratio between
+   * wide and narrow bars in the barcode symbol}
+   * <p>
+   * This feature is used in two-width barcode types such as
+   * {@link ImplITF Interleaved 2 of 5 (ITF)}, {@link ImplCode39 Code 39},
+   * {@link ImplCode11 Code 11} and {@link ImplCodabar Codabar}.
+   *
+   * @see Barcode#setRatio(float)
+   */
+  public boolean supportsRatio() { return getPrototype().supportsRatio(); }
+  /**
+   * {@return whether this barcode type supports auto-completion}
+   * <p>
+   * The returned value indicates whether the {@code autoComplete} parameter has any effect
+   * when calling {@link Barcode#setContent(String, boolean, boolean) setContent} on instances
+   * of this barcode type.
+   */
+  public boolean supportsAutoCompletion() { return getPrototype().supportsAutoCompletion(); }
+  /**
+   * {@return whether this barcode type supports an optional checksum}
+   * <p>
+   * The returned value indicates whether the {@code appendOptionalChecksum} parameter has any
+   * effect when calling {@link Barcode#setContent(String, boolean, boolean) setContent} on
+   * instances of this barcode type.
+   */
+  public boolean supportsOptionalChecksum() { return getPrototype().supportsOptionalChecksum(); }
+
 }

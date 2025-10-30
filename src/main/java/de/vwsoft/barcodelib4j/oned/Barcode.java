@@ -43,7 +43,8 @@ import java.util.Objects;
  * </pre>
  *
  * <b>Note:</b> Boolean methods of the pattern {@code "supportsXYZ"} indicate whether the barcode
- * type (not just the individual instance) supports a particular property. However, calling setter
+ * type (not just the individual instance) supports a particular property. These properties can also
+ * be queried using identically named methods in {@link BarcodeType}. Note also that calling setter
  * methods for unsupported properties has no effect and does not throw an exception.
  */
 public abstract class Barcode implements Cloneable {

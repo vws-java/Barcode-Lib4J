@@ -80,27 +80,12 @@ public enum ImageTransform {
 
 
   /**
-   * Checks whether this transformation type represents a flat rotation (0&deg; or 180&deg;).
-   * <p>
-   * This is a convenience method that can be used to determine whether the horizontal or vertical
-   * resolution of the output medium is relevant in a particular case.
-   * <p>
-   * For 1D barcodes, which mainly consist of vertical bars, only one of the two resolutions is
-   * relevant. For example, when creating a 1D barcode at a 90&deg; or 270&deg; angle, the vertical
-   * resolution is crucial as the bar widths must be adjusted to it. Similarly, at a 0&deg; or
-   * 180&deg; angle, the horizontal resolution is important.
-   * <p>
-   * (However, for 2D codes, if the output medium has differing horizontal and vertical resolutions,
-   * regardless of the transformation used, always use the smaller resolution. For example, in a
-   * setting of 300x600 DPI, use 300 DPI as the relevant resolution.)
+   * Returns the clockwise rotation angle in degrees for this transformation.
    *
-   * @return {@code true} if this transformation type represents a 0&deg; or 180&deg; rotation
-   *         (ROTATE_0, ROTATE_180, ROTATE_0_FLIP, or ROTATE_180_FLIP),
-   *         {@code false} otherwise (90&deg; or 270&deg; rotations)
+   * @return the rotation angle in degrees: 0, 90, 180, or 270
    */
-  public boolean isFlat() {
-    return this == ROTATE_0      || this == ROTATE_180
-        || this == ROTATE_0_FLIP || this == ROTATE_180_FLIP;
+  public int getRotationDegrees() {
+    return (myID % 4) * 90;
   }
 
 
@@ -113,8 +98,34 @@ public enum ImageTransform {
    *         {@code false} otherwise
    */
   public boolean hasFlip() {
-    return this == ROTATE_0_FLIP   || this == ROTATE_90_FLIP
+    return this ==   ROTATE_0_FLIP || this ==  ROTATE_90_FLIP
         || this == ROTATE_180_FLIP || this == ROTATE_270_FLIP;
+  }
+
+
+
+  /**
+   * Checks whether this transformation type represents a flat rotation (0&deg; or 180&deg;).
+   * <p>
+   * This method can be used to determine whether the horizontal or vertical
+   * resolution of the output medium is relevant in a particular case.
+   * <p>
+   * For 1D barcodes, which mainly consist of vertical bars, only one of the two resolutions is
+   * relevant. For example, when outputting a 1D barcode at a 90&deg; or 270&deg; angle, the
+   * vertical resolution is crucial as the bar widths must be adjusted to it. Similarly, at a 0&deg;
+   * or 180&deg; angle, the horizontal resolution is important.
+   * <p>
+   * (However, for 2D codes, if the output medium has differing horizontal and vertical resolutions,
+   * regardless of the transformation used, always use the smaller resolution. For example, in a
+   * setting of 300x600 DPI, use 300 DPI as the relevant resolution.)
+   *
+   * @return {@code true} if this transformation type represents a 0&deg; or 180&deg; rotation
+   *         (ROTATE_0, ROTATE_180, ROTATE_0_FLIP, or ROTATE_180_FLIP),
+   *         {@code false} otherwise (90&deg; or 270&deg; rotations)
+   */
+  public boolean isFlat() {
+    return this == ROTATE_0      || this == ROTATE_180
+        || this == ROTATE_0_FLIP || this == ROTATE_180_FLIP;
   }
 
 }

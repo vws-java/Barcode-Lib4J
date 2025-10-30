@@ -23,10 +23,11 @@ import java.awt.geom.*;
 import java.awt.image.*;
 import java.awt.image.renderable.*;
 import java.io.*;
-import java.lang.reflect.*;
 import java.nio.charset.*;
+import java.security.*;
 import java.text.*;
 import java.util.*;
+import java.util.zip.*;
 import javax.imageio.*;
 import javax.imageio.metadata.*;
 import javax.imageio.stream.*;
@@ -81,8 +82,9 @@ import org.w3c.dom.*;
  * and when to use vertical resolution.
  */
 public class BarExporter {
+  private static final double MM_TO_POINTS = 72.0 / 25.4;
 
-  // Formats coordinates in EPS and SVG files, rounding to a maximum of 6 decimal places.
+  // Formats coordinates in vector files, rounding to a maximum of 6 decimal places.
   private final DecimalFormat myDecimalFormat =
       new DecimalFormat("#.######", new DecimalFormatSymbols(Locale.US));
 
@@ -157,8 +159,7 @@ public class BarExporter {
    * Sets the creator metadata for the image file to be created.
    * <p>
    * This is only supported for EPS and PDF files, where this method sets the "Creator" metadata.
-   * For PDF, the "Producer" field is also set to the same value. Ensure that all characters in the
-   * creator string are supported by the selected file format.
+   * Ensure that all characters in the creator string are supported by the selected file format.
    *
    * @param creator the creator string to set as metadata for the image file,
    *                or {@code null} to omit it
@@ -349,114 +350,186 @@ public class BarExporter {
    * @throws IOException if an I/O error occurs while writing the image
    */
   public void writePDF(OutputStream out, ImageColorModel colorModel) throws IOException {
+    final Point2D.Double size = getEffectiveSize();
+    final Point2D.Double docSize = new Point2D.Double(size.x * MM_TO_POINTS, size.y * MM_TO_POINTS);
+    final ArrayList<Long> xrefOffsets = new ArrayList<>(5);
+    final StringBuilder sb = new StringBuilder(500);
+
+    // Initialize PDF header first to calculate correct offsets
+    byte[] header = "%PDF-1.4\n%\u00E2\u00E3\u00CF\u00D3\n".getBytes(StandardCharsets.ISO_8859_1);
+    long offset = header.length;
+    xrefOffsets.add(offset);
+
+    // Object 1: Catalog
+    apd(sb, "1 0 obj\n<</Type/Catalog/Pages 2 0 R/ViewerPreferences<</PrintScaling/None>>",
+        "/OpenAction[3 0 R/XYZ 0 ", docSize.y, " 1]>>\nendobj\n");
+    xrefOffsets.add(offset + sb.length());
+
+    // Object 2: Pages
+    apd(sb, "2 0 obj\n<</Kids[3 0 R]/Type/Pages/Count 1>>\nendobj\n");
+    xrefOffsets.add(offset + sb.length());
+
+    // Object 3: Page
+    apd(sb, "3 0 obj\n<</Type/Page/Parent 2 0 R/MediaBox [0 0 ", docSize.x, ' ', docSize.y, "]",
+        "/Contents 4 0 R>>\nendobj\n");
+    xrefOffsets.add(offset + sb.length());
+
+    // Object 4: Content Stream
+    byte[] contentStream = writePDFContentStream(docSize, colorModel);
+    apd(sb, "4 0 obj\n<</Filter/FlateDecode/Length ", contentStream.length, ">>\nstream\n");
+    final String pdfBodyBeforeContentStream = sb.toString();
+    offset += pdfBodyBeforeContentStream.length() + contentStream.length;
+    sb.setLength(0);
+    apd(sb, "\nendstream\nendobj\n");
+    xrefOffsets.add(offset + sb.length());
+
+    // Object 5: Info Dictionary
+    apd(sb, "5 0 obj\n<</Producer", encodePDFString("Barcode-Lib4J"));
+    if (myTitle != null)
+      apd(sb, "/Title", encodePDFString(myTitle));
+    if (myCreator != null)
+      apd(sb, "/Creator", encodePDFString(myCreator));
+    apd(sb, "/Subject", encodePDFString(colorModel == ImageColorModel.CMYK ?
+        "CMYK colors used" : "RGB colors used"));
+    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    String timestamp = String.format("(D:%04d%02d%02d%02d%02d%02dZ)",
+        cal.get(Calendar.YEAR),        cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH),
+        cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),    cal.get(Calendar.SECOND));
+    apd(sb, "/CreationDate", timestamp, "/ModDate", timestamp, ">>\nendobj\n");
+
+    // Generate file ID for the trailer
+    String fileId = null;
     try {
-      // Detect OpenPDF package name (differs between versions)
-      String packageName = "com.lowagie.text.";   // OpenPDF 1.0.0 - 2.4.0
-      try {
-        Class.forName(packageName + "Document");
-      } catch (ClassNotFoundException e) {
-        packageName = "org.openpdf.text.";        // OpenPDF 3.0.0 +
-      }
+      String idSource = timestamp + myTitle + myCreator + mySize + System.nanoTime();
+      byte[] hash = MessageDigest.getInstance("MD5").digest(idSource.getBytes());
+      StringBuilder sb32 = new StringBuilder(32);
+      for (byte b : hash)
+        sb32.append(String.format("%02X", b));
+      fileId = sb32.toString();
+    } catch (NoSuchAlgorithmException e) { /* MD5 is always available per Java spec */ }
 
-      // Load OpenPDF classes dynamically
-      Class<?> documentClass       = Class.forName(packageName + "Document");
-      Class<?> rectangleClass      = Class.forName(packageName + "Rectangle");
-      Class<?> byteBufferClass     = Class.forName(packageName + "pdf.ByteBuffer");
-      Class<?> cmykColorClass      = Class.forName(packageName + "pdf.CMYKColor");
-      Class<?> fontMapperClass     = Class.forName(packageName + "pdf.FontMapper");
-      Class<?> pdfActionClass      = Class.forName(packageName + "pdf.PdfAction");
-      Class<?> pdfContentByteClass = Class.forName(packageName + "pdf.PdfContentByte");
-      Class<?> pdfDestinationClass = Class.forName(packageName + "pdf.PdfDestination");
-      Class<?> pdfGraphics2DClass  = Class.forName(packageName + "pdf.PdfGraphics2D");
-      Class<?> pdfNameClass        = Class.forName(packageName + "pdf.PdfName");
-      Class<?> pdfObjectClass      = Class.forName(packageName + "pdf.PdfObject");
-      Class<?> pdfStreamClass      = Class.forName(packageName + "pdf.PdfStream");
-      Class<?> pdfWriterClass      = Class.forName(packageName + "pdf.PdfWriter");
+    // Build cross-reference table and append trailer
+    offset += sb.length();
+    apd(sb, "xref\n0 ", xrefOffsets.size() + 1, "\n0000000000 65535 f \n");
+    for (Long o : xrefOffsets)
+      apd(sb, String.format("%010d 00000 n \n", o));
+    apd(sb, "trailer\n<</Size ", xrefOffsets.size() + 1, "/Root 1 0 R/Info 5 0 R/ID[<",
+        fileId, "><", fileId, ">]>>\nstartxref\n", offset, "\n%%EOF\n");
 
-      // Ensure 6 digits after decimal point instead of only 2
-      Field highPrecisionField = byteBufferClass.getField("HIGH_PRECISION");
-      final boolean oldPrecision = highPrecisionField.getBoolean(null);
-      highPrecisionField.setBoolean(null, true);
-
-      final double scale = 72.0 / 25.4; // mm to 1/72 inch
-      Point2D.Double size = getEffectiveSize();
-      Point2D.Float docSize = new Point2D.Float((float)(size.x * scale), (float)(size.y * scale));
-
-      // Initialize and configure 'Document'
-      Object rect = rectangleClass.getConstructor(float.class, float.class)
-          .newInstance(docSize.x, docSize.y);
-      if (myIsOpaque)
-        rectangleClass.getMethod("setBackgroundColor", Color.class)
-            .invoke(rect, getColorForPDF(myBackground, colorModel, cmykColorClass));
-      Object doc = documentClass.getConstructor(rectangleClass).newInstance(rect);
-
-      // Initialize and configure 'PdfWriter'
-      Object writer = pdfWriterClass.getMethod("getInstance", documentClass, OutputStream.class)
-          .invoke(null, doc, out);
-      pdfWriterClass.getMethod("setCompressionLevel", int.class)
-          .invoke(writer, pdfStreamClass.getField("BEST_COMPRESSION").getInt(null));
-      pdfWriterClass.getMethod("setPDFXConformance", int.class).invoke(writer,
-          colorModel == ImageColorModel.CMYK ? pdfWriterClass.getField("PDFX1A2001").getInt(null) :
-                                               pdfWriterClass.getField("PDFX32002").getInt(null));
-
-      // Open previously initialized 'Document' and add more properties
-      documentClass.getMethod("open").invoke(doc);
-      if (myTitle != null)
-        documentClass.getMethod("addTitle", String.class).invoke(doc, myTitle);
-      if (myCreator != null) {
-        documentClass.getMethod("addCreator", String.class).invoke(doc, myCreator);
-        documentClass.getMethod("addProducer", String.class).invoke(doc, myCreator);
-      }
-      documentClass.getMethod("addSubject", String.class).invoke(doc,
-          colorModel == ImageColorModel.CMYK ? "PDF/X-1a:2001, CMYK colors" :
-                                               "PDF/X-3:2002, RGB colors");
-
-      // Retrieve 'Graphics2D', draw content, then dispose
-      Object g2d = pdfGraphics2DClass.getConstructor(pdfContentByteClass, float.class, float.class,
-          fontMapperClass, boolean.class, boolean.class, float.class)
-              .newInstance(pdfWriterClass.getMethod("getDirectContent").invoke(writer),
-                  docSize.x, docSize.y, null, true, false, 1F);
-      AffineTransform at = AffineTransform.getScaleInstance(scale, scale);
-      at.concatenate(createTransform());
-      pdfGraphics2DClass.getMethod("setTransform", AffineTransform.class).invoke(g2d, at);
-      pdfGraphics2DClass.getMethod("setColor", Color.class)
-          .invoke(g2d, getColorForPDF(myForeground, colorModel, cmykColorClass));
-      pdfGraphics2DClass.getMethod("fill", Shape.class).invoke(g2d, myGraphics2D.getAllShapes());
-      pdfGraphics2DClass.getMethod("dispose").invoke(g2d);
-
-      // By default PDF readers should NOT scale the document when printing
-      pdfWriterClass.getMethod("addViewerPreference", pdfNameClass, pdfObjectClass).invoke(writer,
-          pdfNameClass.getField("PRINTSCALING").get(null), pdfNameClass.getField("NONE").get(null));
-
-      // Set zoom to 100% when opening the document (otherwise it fits to window)
-      Object pdfDest =
-          pdfDestinationClass.getConstructor(int.class, float.class, float.class, float.class)
-              .newInstance(pdfDestinationClass.getField("XYZ").getInt(null), 0F, docSize.y, 1F);
-      pdfWriterClass.getMethod("setOpenAction", pdfActionClass)
-          .invoke(writer, pdfActionClass.getMethod("gotoLocalPage", int.class,
-              pdfDestinationClass, pdfWriterClass).invoke(null, 1, pdfDest, writer));
-
-      documentClass.getMethod("close").invoke(doc);
-      pdfWriterClass.getMethod("close").invoke(writer);
-
-      // Restore old value for precision within OpenPDF
-      highPrecisionField.setBoolean(null, oldPrecision);
-
-    } catch (ClassNotFoundException e) {
-      throw new IOException("OpenPDF library not available, please add it to your classpath", e);
-    } catch (ReflectiveOperationException e) {
-      throw new IOException("Error accessing OpenPDF library via reflection", e);
-    }
+    // Write complete PDF to output
+    out.write(header);
+    out.write(pdfBodyBeforeContentStream.getBytes(StandardCharsets.US_ASCII));
+    out.write(contentStream);
+    out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
   }
 
 
 
-  private Color getColorForPDF(CompoundColor c, ImageColorModel colorModel, Class<?> cmykColorClass)
-      throws ReflectiveOperationException {
-    return colorModel == ImageColorModel.RGB ? c :
-        (Color)cmykColorClass.getConstructor(float.class, float.class, float.class, float.class)
-            .newInstance(c.getCyan()   / 100F,   c.getMagenta() / 100F,
-                         c.getYellow() / 100F,   c.getKey()     / 100F);
+  private byte[] writePDFContentStream(Point2D.Double docSize, ImageColorModel colorModel)
+      throws IOException {
+    final String br = "\n";
+    final StringBuilder sb = new StringBuilder(10_000);
+
+    // Draw background if requested
+    if (myIsOpaque) {
+      apd(sb, getColorCommand(myBackground, colorModel, ImageFormat.PDF), br);
+      apd(sb, "0 0 ", docSize.x, ' ', docSize.y, " re f", br);
+    }
+
+    // Draw barcode content
+    apd(sb, getColorCommand(myForeground, colorModel, ImageFormat.PDF), br);
+    AffineTransform at = new AffineTransform(MM_TO_POINTS, 0.0, 0.0, -MM_TO_POINTS, 0.0, docSize.y);
+    at.concatenate(createTransform());
+    for (Rectangle2D r : myGraphics2D.getBarsRectangles(at))
+      apd(sb, r.getX(), ' ', r.getY(), ' ', r.getWidth(), ' ', r.getHeight(), " re", br);
+    final double[] d = new double[6];
+    final double[] lastPoint = new double[2];
+    final double[] controlPoint = new double[4];
+    PathIterator pathIterator = myGraphics2D.getTextShapes().getPathIterator(at);
+    while (!pathIterator.isDone()) {
+      switch (pathIterator.currentSegment(d)) {
+        case PathIterator.SEG_MOVETO:
+          apd(sb, d[0], ' ', d[1], " m", br);
+          lastPoint[0] = d[0];
+          lastPoint[1] = d[1];
+          break;
+        case PathIterator.SEG_LINETO:
+          apd(sb, d[0], ' ', d[1], " l", br);
+          lastPoint[0] = d[0];
+          lastPoint[1] = d[1];
+          break;
+        case PathIterator.SEG_QUADTO:
+          controlPoint[0] = d[0] + (lastPoint[0] - d[0]) / 3.0;
+          controlPoint[1] = d[1] + (lastPoint[1] - d[1]) / 3.0;
+          controlPoint[2] = d[0] + (d[2] - d[0]) / 3.0;
+          controlPoint[3] = d[1] + (d[3] - d[1]) / 3.0;
+          apd(sb, controlPoint[0], ' ', controlPoint[1], ' ', controlPoint[2], ' ',
+              controlPoint[3], ' ', d[2], ' ', d[3], " c", br);
+          lastPoint[0] = d[2];
+          lastPoint[1] = d[3];
+          break;
+        case PathIterator.SEG_CUBICTO:
+          apd(sb, d[0], ' ', d[1], ' ', d[2], ' ', d[3], ' ', d[4], ' ', d[5], " c", br);
+          lastPoint[0] = d[4];
+          lastPoint[1] = d[5];
+          break;
+        case PathIterator.SEG_CLOSE:
+          apd(sb, "h", br);
+      }
+      pathIterator.next();
+    }
+    apd(sb, "f", br); // Fill all paths at once
+
+    byte[] uncompressed = sb.toString().getBytes(StandardCharsets.US_ASCII);
+
+    Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
+    deflater.setStrategy(Deflater.FILTERED); // Measured best compression for coordinate data
+    deflater.setInput(uncompressed);
+    deflater.finish();
+    ByteArrayOutputStream baos = new ByteArrayOutputStream(uncompressed.length / 2);
+    byte[] buffer = new byte[4096];
+    while (!deflater.finished())
+      baos.write(buffer, 0, deflater.deflate(buffer));
+    deflater.end();
+
+    return baos.toByteArray();
+  }
+
+
+
+  private String encodePDFString(String s) {
+    boolean needsUnicode = s.codePoints().anyMatch(cp -> cp > 126);
+
+    if (needsUnicode) { // Encode as UTF-16BE hex string with BOM
+      StringBuilder sb = new StringBuilder(s.length() * 6);
+      sb.append("<FEFF");
+      for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        if (Character.isHighSurrogate(c) && i + 1 < s.length()) {
+          char low = s.charAt(i + 1);
+          if (Character.isLowSurrogate(low)) {
+            sb.append(String.format(Locale.ROOT, "%04X%04X", (int)c, (int)low));
+            i++; // skip low surrogate
+            continue;
+          }
+        }
+        sb.append(String.format(Locale.ROOT, "%04X", (int)c));
+      }
+      return sb.append('>').toString();
+    } else { // Encode as standard ASCII literal string
+      StringBuilder sb = new StringBuilder(s.length() + 10);
+      sb.append('(');
+      for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        if (c == '(' || c == ')' || c == '\\')
+          sb.append('\\').append(c);
+        else if (c < 32)
+          sb.append(String.format(Locale.ROOT, "\\%03o", (int)c));
+        else
+          sb.append(c);
+      }
+      return sb.append(')').toString();
+    }
   }
 
 
@@ -506,9 +579,8 @@ public class BarExporter {
 
   // Creates an EPS file without an embedded TIFF preview
   private void writePureEPS(OutputStream out, ImageColorModel colorModel) throws IOException {
-    final double scale = 72.0 / 25.4; // mm to 1/72 inch
     final Point2D.Double size = getEffectiveSize();
-    final Point2D.Double pageSize = new Point2D.Double(size.x * scale, size.y * scale);
+    final Point2D.Double docSize = new Point2D.Double(size.x * MM_TO_POINTS, size.y * MM_TO_POINTS);
     final String br = "\n";
     final StringBuilder sb = new StringBuilder(10_000);
 
@@ -517,27 +589,28 @@ public class BarExporter {
       apd(sb, "%%Title: ", myTitle, br);
     if (myCreator != null)
       apd(sb, "%%Creator: ", myCreator, br);
-    apd(sb, "%%HiResBoundingBox: 0 0 ", pageSize.x, ' ', pageSize.y, br, br);
+    apd(sb, "%%HiResBoundingBox: 0 0 ", docSize.x, ' ', docSize.y, br, br);
 
     apd(sb, "/m {moveto} bind def", br);
     apd(sb, "/l {lineto} bind def", br);
     apd(sb, "/c {curveto} bind def", br);
-    apd(sb, "/z {closepath} bind def", br, br);
+    apd(sb, "/r {rectfill} bind def", br);      // Only command that differs from PDF ('re')
+    apd(sb, "/h {closepath} bind def", br, br);
 
     if (myIsOpaque) {
-      apd(sb, getColorCommandForEPS(myBackground, colorModel), br);
-      apd(sb, "0 0 ", pageSize.x, ' ', pageSize.y, " rectfill", br, br);
+      apd(sb, getColorCommand(myBackground, colorModel, ImageFormat.EPS), br);
+      apd(sb, "0 0 ", docSize.x, ' ', docSize.y, " r", br, br);
     }
 
-    apd(sb, getColorCommandForEPS(myForeground, colorModel), br);
-
+    apd(sb, getColorCommand(myForeground, colorModel, ImageFormat.EPS), br);
+    AffineTransform at = new AffineTransform(MM_TO_POINTS, 0.0, 0.0, -MM_TO_POINTS, 0.0, docSize.y);
+    at.concatenate(createTransform());
+    for (Rectangle2D r : myGraphics2D.getBarsRectangles(at))
+      apd(sb, r.getX(), ' ', r.getY(), ' ', r.getWidth(), ' ', r.getHeight(), " r", br);
     final double[] d = new double[6];
     final double[] lastPoint = new double[2];
     final double[] controlPoint = new double[4];
-    AffineTransform at = AffineTransform.getTranslateInstance(0.0, pageSize.y);
-    at.scale(scale, -scale);
-    at.concatenate(createTransform());
-    PathIterator pathIterator = myGraphics2D.getAllShapes().getPathIterator(at);
+    PathIterator pathIterator = myGraphics2D.getTextShapes().getPathIterator(at);
     while (!pathIterator.isDone()) {
       switch (pathIterator.currentSegment(d)) {
         case PathIterator.SEG_MOVETO:
@@ -566,26 +639,13 @@ public class BarExporter {
           lastPoint[1] = d[5];
           break;
         case PathIterator.SEG_CLOSE:
-          apd(sb, 'z', br);
+          apd(sb, 'h', br);
       }
       pathIterator.next();
     }
     apd(sb, "fill", br);
 
     out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
-  }
-
-
-
-  private String getColorCommandForEPS(CompoundColor c, ImageColorModel colorModel) {
-    return colorModel == ImageColorModel.RGB ?
-        myDecimalFormat.format(c.getRed()     / 255.0) + " " +
-        myDecimalFormat.format(c.getGreen()   / 255.0) + " " +
-        myDecimalFormat.format(c.getBlue()    / 255.0) + " setrgbcolor" :
-        myDecimalFormat.format(c.getCyan()    / 100.0) + " " +
-        myDecimalFormat.format(c.getMagenta() / 100.0) + " " +
-        myDecimalFormat.format(c.getYellow()  / 100.0) + " " +
-        myDecimalFormat.format(c.getKey()     / 100.0) + " setcmykcolor";
   }
 
 
@@ -640,6 +700,29 @@ public class BarExporter {
 
 
 
+  private static String getColorForSVG(Color c) {
+    return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
+  }
+
+
+
+  // Called by PDF and EPS write methods
+  private String getColorCommand(CompoundColor c, ImageColorModel colorModel, ImageFormat format) {
+    return colorModel == ImageColorModel.RGB ?
+        myDecimalFormat.format(c.getRed()     / 255.0) + " " +
+        myDecimalFormat.format(c.getGreen()   / 255.0) + " " +
+        myDecimalFormat.format(c.getBlue()    / 255.0) + " " +
+        (format == ImageFormat.PDF ? "rg" : "setrgbcolor") :
+        myDecimalFormat.format(c.getCyan()    / 100.0) + " " +
+        myDecimalFormat.format(c.getMagenta() / 100.0) + " " +
+        myDecimalFormat.format(c.getYellow()  / 100.0) + " " +
+        myDecimalFormat.format(c.getKey()     / 100.0) + " " +
+        (format == ImageFormat.PDF ? "k" : "setcmykcolor");
+  }
+
+
+
+  // Called by the SVG write method
   private static String escapeXML(String s) {
     StringBuilder sb = new StringBuilder(s.length() + 10);
     for (int i=0; i<s.length(); i++) {
@@ -654,12 +737,6 @@ public class BarExporter {
       }
     }
     return sb.toString();
-  }
-
-
-
-  private static String getColorForSVG(Color c) {
-    return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
   }
 
 
@@ -757,24 +834,37 @@ public class BarExporter {
 
   private static void toPNG(RenderedImage img, OutputStream out, int dpiResX, int dpiResY)
       throws IOException {
-    ImageWriter imageWriter = ImageIO.getImageWritersByFormatName("png").next();
-    IIOMetadata iiomd = imageWriter.getDefaultImageMetadata(new ImageTypeSpecifier(img),
-        imageWriter.getDefaultWriteParam());
-
-    if (dpiResX > 0 && dpiResY > 0) {
-      String formatName = "javax_imageio_png_1.0";
-      IIOMetadataNode rootNode = (IIOMetadataNode)iiomd.getAsTree(formatName);
-      IIOMetadataNode pHYSNode = ensureChildNode(rootNode, "pHYs");
-      pHYSNode.setAttribute("unitSpecifier", "meter");
-      pHYSNode.setAttribute("pixelsPerUnitXAxis", Long.toString(Math.round(dpiResX / .0254)));
-      pHYSNode.setAttribute("pixelsPerUnitYAxis", Long.toString(Math.round(dpiResY / .0254)));
-      try {
-        iiomd.setFromTree(formatName, rootNode);
-      } catch (IIOInvalidTreeException e) {}
+    final String neededFormatName = "javax_imageio_png_1.0";
+    ImageWriter imageWriter = null;
+    IIOMetadata iiomd = null;
+    Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
+    while (writers.hasNext()) {
+      ImageWriter w = writers.next();
+      iiomd = w.getDefaultImageMetadata(new ImageTypeSpecifier(img), w.getDefaultWriteParam());
+      if (neededFormatName.equals(iiomd.getNativeMetadataFormatName())) {
+        imageWriter = w;
+        break;
+      }
     }
+    if (imageWriter == null)
+      throw new IOException("No suitable PNG ImageWriter found");
 
-    imageWriter.setOutput(new MemoryCacheImageOutputStream(out));
-    imageWriter.write(new IIOImage(img, null, iiomd));
+    try (ImageOutputStream ios = new MemoryCacheImageOutputStream(out)) {
+      try {
+        IIOMetadataNode rootNode = (IIOMetadataNode)iiomd.getAsTree(neededFormatName);
+        IIOMetadataNode pHYSNode = ensureChildNode(rootNode, "pHYs");
+        pHYSNode.setAttribute("unitSpecifier", "meter");
+        pHYSNode.setAttribute("pixelsPerUnitXAxis", Long.toString(Math.round(dpiResX / 0.0254)));
+        pHYSNode.setAttribute("pixelsPerUnitYAxis", Long.toString(Math.round(dpiResY / 0.0254)));
+        iiomd.setFromTree(neededFormatName, rootNode);
+      } catch (Exception e) {
+        throw new IOException("Failed to apply DPI metadata to PNG image", e);
+      }
+      imageWriter.setOutput(ios);
+      imageWriter.write(new IIOImage(img, null, iiomd));
+    } finally {
+      imageWriter.dispose();
+    }
   }
 
 
@@ -796,8 +886,8 @@ public class BarExporter {
           if (baos.size() >= 38) {
             b = baos.toByteArray();
             super.write(b, 0, 38);
-            super.writeInt(Integer.reverseBytes(Math.round(dpiResX / .0254F)));
-            super.writeInt(Integer.reverseBytes(Math.round(dpiResY / .0254F)));
+            super.writeInt(Integer.reverseBytes(Math.round(dpiResX / 0.0254F)));
+            super.writeInt(Integer.reverseBytes(Math.round(dpiResY / 0.0254F)));
             if (b.length > 46)
               super.write(b, 46, b.length - 46);
             baos = null;
@@ -808,34 +898,52 @@ public class BarExporter {
       }
     };
 
-    imageWriter.setOutput(new MemoryCacheImageOutputStream(dos));
-    imageWriter.write(new IIOImage(img, null, iiomd));
+    try (ImageOutputStream ios = new MemoryCacheImageOutputStream(dos)) {
+      imageWriter.setOutput(ios);
+      imageWriter.write(new IIOImage(img, null, iiomd));
+    } finally {
+      imageWriter.dispose();
+    }
   }
 
 
 
   private static void toJPG(RenderedImage img, OutputStream out, int dpiResX, int dpiResY,
       float quality) throws IOException {
-    ImageWriter imageWriter = ImageIO.getImageWritersByFormatName("jpg").next();
-    ImageWriteParam param = imageWriter.getDefaultWriteParam();
-    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-    param.setCompressionQuality(quality);
-    IIOMetadata iiomd = imageWriter.getDefaultImageMetadata(new ImageTypeSpecifier(img), param);
-
-    if (dpiResX > 0 && dpiResX <= 65535 && dpiResY > 0 && dpiResY <= 65535) {
-      String formatName = "javax_imageio_jpeg_image_1.0";
-      IIOMetadataNode rootNode = (IIOMetadataNode)iiomd.getAsTree(formatName);
-      IIOMetadataNode node = ensureChildNode(ensureChildNode(rootNode, "JPEGvariety"), "app0JFIF");
-      node.setAttribute("resUnits", "1"); // "dpi"
-      node.setAttribute("Xdensity", Integer.toString(dpiResX));
-      node.setAttribute("Ydensity", Integer.toString(dpiResY));
-      try {
-        iiomd.setFromTree(formatName, rootNode);
-      } catch (IIOInvalidTreeException e) {}
+    final String neededFormatName = "javax_imageio_jpeg_image_1.0";
+    ImageWriter imageWriter = null;
+    IIOMetadata iiomd = null;
+    Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+    while (writers.hasNext()) {
+      ImageWriter w = writers.next();
+      iiomd = w.getDefaultImageMetadata(new ImageTypeSpecifier(img), w.getDefaultWriteParam());
+      if (neededFormatName.equals(iiomd.getNativeMetadataFormatName())) {
+        imageWriter = w;
+        break;
+      }
     }
+    if (imageWriter == null)
+      throw new IOException("No suitable JPEG ImageWriter found");
 
-    imageWriter.setOutput(new MemoryCacheImageOutputStream(out));
-    imageWriter.write(new IIOImage(img, null, iiomd));
+    try (ImageOutputStream ios = new MemoryCacheImageOutputStream(out)) {
+      try {
+        ImageWriteParam param = imageWriter.getDefaultWriteParam();
+        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        param.setCompressionQuality(quality);
+        IIOMetadataNode root = (IIOMetadataNode)iiomd.getAsTree(neededFormatName);
+        IIOMetadataNode n = ensureChildNode(ensureChildNode(root, "JPEGvariety"), "app0JFIF");
+        n.setAttribute("resUnits", "1"); // 1 = "dpi"
+        n.setAttribute("Xdensity", Integer.toString(dpiResX));
+        n.setAttribute("Ydensity", Integer.toString(dpiResY));
+        iiomd.setFromTree(neededFormatName, root);
+      } catch (Exception e) {
+        throw new IOException("Failed to apply parameters to JPEG image", e);
+      }
+      imageWriter.setOutput(ios);
+      imageWriter.write(new IIOImage(img, null, iiomd));
+    } finally {
+      imageWriter.dispose();
+    }
   }
 
 
@@ -855,7 +963,7 @@ public class BarExporter {
 
   private static class BarcodeGraphics2D extends Graphics2D {
     Graphics2D fontG2D = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_GRAY).createGraphics();
-    Area barsShapes = new Area();
+    ArrayList<Rectangle2D> barsRectangles = new ArrayList<>(40); // Decent default for 1D barcodes
     Area textShapes = new Area();
 
 
@@ -865,11 +973,23 @@ public class BarExporter {
     }
 
 
-    Area getBarsShapes() { return barsShapes; }
-    Area getTextShapes() { return textShapes; }
-    Area getAllShapes() {
+    Rectangle2D[] getBarsRectangles(AffineTransform at) {
+      Rectangle2D[] r = new Rectangle2D[barsRectangles.size()];
+      for (int i=r.length-1; i>=0; i--)
+        r[i] = at.createTransformedShape(barsRectangles.get(i)).getBounds2D();
+      return r;
+    }
+    Area getBarsShapes() {
       Area a = new Area();
-      a.add(barsShapes);
+      for (Rectangle2D r : barsRectangles)
+        a.add(new Area(r));
+      return a;
+    }
+    Area getTextShapes() {
+      return textShapes;
+    }
+    Area getAllShapes() {
+      Area a = getBarsShapes();
       a.add(textShapes);
       return a;
     }
@@ -877,7 +997,7 @@ public class BarExporter {
 
     // Only a subset of Graphics2D methods is required for this implementation
     public void fill(Shape shape) {
-      barsShapes.add(new Area(shape));
+      barsRectangles.add(shape.getBounds2D());
     }
     public void drawString(String text, float x, float y) {
       FontRenderContext rc = getFontRenderContext();

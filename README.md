@@ -61,8 +61,7 @@
 
 ## Required Java Version & Dependencies
 - Minimum Java Version: 11
-- Optional: [OpenPDF](https://github.com/LibrePDF/OpenPDF) version 1.3.0 to 3.0.0 is needed for PDF export - Please ensure the used version is compatible with your Java version!
-<br>
+- **Zero dependencies!** All functionality included in a single, lightweight JAR (~300 KB)
 
 ## Get Started &ndash; Maven and Gradle, Examples, Best Practices
 - 📦 **Installation Guide** - Maven and Gradle dependency snippets

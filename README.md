@@ -62,6 +62,7 @@
 ## Required Java Version & Dependencies
 - Minimum Java Version: 11
 - **Zero dependencies!** All functionality included in a single, lightweight JAR (~300 KB)
+<br>
 
 ## Get Started &ndash; Maven and Gradle, Examples, Best Practices
 - 📦 **Installation Guide** - Maven and Gradle dependency snippets

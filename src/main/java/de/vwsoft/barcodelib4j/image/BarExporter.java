@@ -552,14 +552,19 @@ public class BarExporter {
 
     ByteArrayOutputStream tiffArray = new ByteArrayOutputStream(10_000);
     BufferedImage img = createBufferedImage(myTiffRes, myTiffRes, null, myForeground, myBackground);
-    ImageWriter imageWriter = ImageIO.getImageWritersByFormatName("tiff").next();
+    Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("tiff");
+    if (!writers.hasNext())
+      throw new IOException("No TIFF ImageWriter found");
+    ImageWriter imageWriter = writers.next();
     ImageWriteParam param = imageWriter.getDefaultWriteParam();
     param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
     param.setCompressionType("LZW");
-    MemoryCacheImageOutputStream mc = new MemoryCacheImageOutputStream(tiffArray);
-    imageWriter.setOutput(mc);
-    imageWriter.write(null, new IIOImage(img, null, null), param);
-    mc.flush();
+    try (ImageOutputStream mc = new MemoryCacheImageOutputStream(tiffArray)) {
+      imageWriter.setOutput(mc);
+      imageWriter.write(null, new IIOImage(img, null, null), param);
+    } finally {
+      imageWriter.dispose();
+    }
 
     DataOutputStream dos = new DataOutputStream(out);
     dos.writeInt(0xC5D0D3C6); // EPS binary file header magic number (4 bytes)

@@ -23,16 +23,24 @@
 <br>
 
 ## Features
-- Drawing and printing of 1D and 2D barcodes using Java 2D (java.awt.Graphics2D)
-- Vector and raster image export with full support for format-specific features such as color models (CMYK, RGB), transparency, high coordinate precision, optional embedded preview (EPS), and DPI handling
-- **Adjustment of bar widths to printer resolution (important for ensuring proper barcode quality at resolutions ≤ 600 dpi)**
-- Bar width reduction/correction (useful to account for ink spread in inkjet printers)
-- Customizable plain text line: font, size, spacing and editable content; Optional automatic font size adjustment; Additionally, the plain text line can be positioned at the top, bottom or completely hidden
-- Advanced setting: Customizable size of the barcode bars ("module size")
-- Rotation in 90-degree increments, taking into account the horizontal and vertical resolution of the target medium (e.g. when outputting to low-resolution printers)
-- Configurable bar width ratio from 2:1 to 3:1 for barcode types that support this feature: Interleaved 2 of 5, Code 39 and others
-- Add-Ons 2 or 5 for the barcode types EAN-13, EAN-8, UPC-A, UPC-E, ISBN-13 and ISMN; second plain text line for ISBN-13 and ISMN
-- **Comprehensive support for GS1-128, GS1 DataMatrix and GS1 QR Code:** Verification of data integrity such as correctness of application identifiers, length and format of individual data elements, verification/calculation of the check digit in SSCC and GTIN and more
+- **Zero Dependencies:** All functionality is included in a single, lightweight ~300 KB JAR with no external libraries required.
+- **Vector & Raster Output:** Generates barcodes as PDF, EPS, SVG, PNG, BMP, and JPG — suitable for print workflows, UI rendering, and batch processing.
+- **RGB & CMYK Support:** Provides CMYK/RGB support in vector formats and RGB support in raster formats for professional color accuracy.
+- **High-Precision Coordinates:** Stores vector coordinates with up to six decimal places to ensure crisp, scalable line rendering.
+- **Resolution-Adaptive Bars:** Automatically adjusts bar and module sizes to the target resolution to ensure optimal quality at ≤ 600 dpi and for all raster devices.
+- **Ink-Spread Compensation:** Applies optional bar-width correction to counteract ink spread on inkjet printers.
+- **GS1-Validated Encoding:** Includes comprehensive GS1 support (GS1-128, GS1 DataMatrix, GS1 QR Code) with AI validation, data-format checks, and check-digit verification.
+- **Extensive Barcode Coverage:** Supports a wide range of 1D and 2D symbologies including Code 128, EAN/UPC, ITF, Code 39, QR, DataMatrix, PDF417, Aztec, and more.
+- **Transparent Backgrounds:** Allows full transparency in EPS, PDF, SVG, and PNG exports for seamless overlay in graphic applications.
+- **Configurable Text Line:** Fully customizable human-readable text with adjustable font, size, spacing, top/bottom placement, or complete hiding.
+- **Automatic Font Scaling:** Optionally adjusts text size automatically to fit the available barcode width.
+- **Custom Module Size:** Provides direct control over the physical size of bars/modules for precise print output.
+- **Rotation Support:** Supports rotation in 90-degree increments with correct handling of differing horizontal/vertical printer resolutions.
+- **Bar Width Ratio Control:** Allows adjusting wide-to-narrow bar ratios (2.0:1 to 3.0:1) for symbologies that support variable ratios (ITF, Code 39, etc.).
+- **Add-On Symbols:** Supports 2- and 5-digit add-ons for EAN-13, EAN-8, UPC-A, UPC-E, ISBN-13, and ISMN, including an optional second text line.
+- **EPS TIFF Preview:** EPS export can embed a TIFF preview for applications without a built-in EPS interpreter.
+- **Accurate Raster Metadata:** Raster exports store DPI information to preserve physical dimensions and ensure consistent printing.
+- **Artifact-Free Rendering:** Raster output avoids aliasing, distortion, or unintended pixel interpolation.
 
 ## Image Output Formats
 | Format | Type | CMYK colors | RGB colors | Transparency support |

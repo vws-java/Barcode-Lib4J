@@ -42,6 +42,8 @@
 - **Accurate Raster Metadata:** Raster exports store DPI information to preserve physical dimensions and ensure consistent printing.
 - **Artifact-Free Rendering:** Raster output avoids aliasing, distortion, or unintended pixel interpolation.
 
+<br>
+
 ## Image Output Formats
 | Format | Type | CMYK colors | RGB colors | Transparency support |
 |--------|---------------|------|-----|---------------------------|
@@ -54,6 +56,8 @@
 - **EPS**: Optional embedding of a TIFF preview for display in graphic applications without their own EPS interpreter
 - **PDF, EPS, SVG**: Coordinates are stored with up to six decimal places for high precision
 - **PNG, BMP, JPG**: DPI resolution is stored in the file header, thereby preserving both the target resolution and the original dimensions of the graphic for later printing; No aliasing, distortion or other unwanted artifacts
+
+<br>
 
 ## Supported Barcode Formats
 | 1D Barcodes | 2D Barcodes |
@@ -70,6 +74,7 @@
 ## Required Java Version & Dependencies
 - Minimum Java Version: 11
 - **Zero dependencies!** All functionality included in a single, lightweight JAR (~300 KB)
+
 <br>
 
 ## Get Started &ndash; Maven and Gradle, Examples, Best Practices

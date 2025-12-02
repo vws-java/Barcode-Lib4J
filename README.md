@@ -71,7 +71,7 @@
 
 ## Required Java Version & Dependencies
 - Minimum Java Version: 11
-- **No dependencies!** All functionality included in a single, lightweight JAR (~300 KB)
+- **No dependencies!** All functionality included in a single, lightweight JAR
 
 <br>
 

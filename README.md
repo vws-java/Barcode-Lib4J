@@ -31,14 +31,14 @@
 - **Ink-Spread Compensation:** Applies optional bar-width correction to counteract ink spread on inkjet printers.
 - **Extensive Barcode Coverage:** Supports all popular 1D and 2D symbologies including Code 128, EAN/UPC, ITF, Code 39, QR Code, DataMatrix, PDF417, Aztec, and more.
 - **GS1-Validated Encoding:** Includes comprehensive GS1 support (GS1-128, GS1 DataMatrix, GS1 QR Code) with AI validation, data-format checks, and check-digit verification.
-- **Transparent Backgrounds:** Allows full transparency in EPS, PDF, SVG, and PNG exports for seamless overlay.
+- **Transparent Backgrounds:** Allows full transparency in EPS, PDF, SVG, and PNG images for seamless overlay.
 - **Configurable Text Line:** Fully customizable human-readable text with adjustable font, size, spacing, top/bottom placement, or complete hiding.
 - **Automatic Font Scaling:** Optionally adjusts text size automatically to fit the available barcode width.
 - **Custom Module Size:** Provides direct control over the physical size of bars/modules for precise print output.
 - **Rotation Support:** Supports rotation in 90-degree increments with correct handling of differing horizontal and vertical printer resolutions.
 - **Bar Width Ratio Control:** Allows adjusting wide-to-narrow bar ratios (2.0:1 to 3.0:1) for symbologies that support variable ratios (ITF, Code 39, etc.).
 - **Add-On Symbols:** Supports 2- and 5-digit add-ons for EAN-13, EAN-8, UPC-A, UPC-E, ISBN-13, and ISMN, including an optional second text line (at the top).
-- **Accurate Raster Metadata:** Raster exports store DPI information to preserve physical dimensions and ensure consistent printing.
+- **Accurate Raster Metadata:** Raster images store DPI information to preserve physical dimensions and ensure consistent printing.
 
 <br>
 

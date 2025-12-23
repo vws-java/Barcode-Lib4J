@@ -96,6 +96,7 @@ public class BarExporter {
   private CompoundColor myForeground = CompoundColor.CC_BLACK;
   private CompoundColor myBackground = CompoundColor.CC_WHITE;
   private ImageTransform myTransform = ImageTransform.ROTATE_0;
+  private boolean myIsInlineSVG;
   private int myTiffRes;
 
 
@@ -237,6 +238,22 @@ public class BarExporter {
 
 
   /**
+   * Sets whether SVG output should be generated as inline SVG or as standalone SVG document.
+   * <p>
+   * When set to {@code true}, the XML declaration and xmlns attribute are omitted, making
+   * the SVG suitable for direct embedding in HTML5 documents. When {@code false} (default),
+   * a complete standalone SVG document with XML declaration is generated.
+   *
+   * @param isInline {@code true} for inline SVG (no XML declaration, no xmlns attribute),
+   *                 {@code false} for standalone SVG document
+   */
+  public void setInlineSVG(boolean isInline) {
+    myIsInlineSVG = isInline;
+  }
+
+
+
+  /**
    * Sets the resolution of the embedded TIFF preview when exporting to EPS format.
    * <p>
    * A value of {@code 0} (default) means that no TIFF preview is embedded in the EPS file.
@@ -283,7 +300,7 @@ public class BarExporter {
     else {
       if (dpiResX <= 0 || dpiResY <= 0)
         throw new IllegalArgumentException("Resolution must be > 0 for raster formats");
-      BufferedImage img = createBufferedImage(dpiResX, dpiResY, format, myForeground, myBackground);
+      BufferedImage img = createBufferedImage(dpiResX, dpiResY, format);
       if (format == ImageFormat.PNG)
         toPNG(img, out, dpiResX, dpiResY);
       else if (format == ImageFormat.BMP)
@@ -440,43 +457,47 @@ public class BarExporter {
     apd(sb, getColorCommand(myForeground, colorModel, ImageFormat.PDF), br);
     AffineTransform at = new AffineTransform(MM_TO_POINTS, 0.0, 0.0, -MM_TO_POINTS, 0.0, docSize.y);
     at.concatenate(createTransform());
-    for (Rectangle2D r : myGraphics2D.getBarsRectangles(at))
+    for (Rectangle2D r : myGraphics2D.barRectangles) {
+      r = at.createTransformedShape(r).getBounds2D();
       apd(sb, r.getX(), ' ', r.getY(), ' ', r.getWidth(), ' ', r.getHeight(), " re", br);
+    }
     final double[] d = new double[6];
     final double[] lastPoint = new double[2];
     final double[] controlPoint = new double[4];
-    PathIterator pathIterator = myGraphics2D.getTextShapes().getPathIterator(at);
-    while (!pathIterator.isDone()) {
-      switch (pathIterator.currentSegment(d)) {
-        case PathIterator.SEG_MOVETO:
-          apd(sb, d[0], ' ', d[1], " m", br);
-          lastPoint[0] = d[0];
-          lastPoint[1] = d[1];
-          break;
-        case PathIterator.SEG_LINETO:
-          apd(sb, d[0], ' ', d[1], " l", br);
-          lastPoint[0] = d[0];
-          lastPoint[1] = d[1];
-          break;
-        case PathIterator.SEG_QUADTO:
-          controlPoint[0] = d[0] + (lastPoint[0] - d[0]) / 3.0;
-          controlPoint[1] = d[1] + (lastPoint[1] - d[1]) / 3.0;
-          controlPoint[2] = d[0] + (d[2] - d[0]) / 3.0;
-          controlPoint[3] = d[1] + (d[3] - d[1]) / 3.0;
-          apd(sb, controlPoint[0], ' ', controlPoint[1], ' ', controlPoint[2], ' ',
-              controlPoint[3], ' ', d[2], ' ', d[3], " c", br);
-          lastPoint[0] = d[2];
-          lastPoint[1] = d[3];
-          break;
-        case PathIterator.SEG_CUBICTO:
-          apd(sb, d[0], ' ', d[1], ' ', d[2], ' ', d[3], ' ', d[4], ' ', d[5], " c", br);
-          lastPoint[0] = d[4];
-          lastPoint[1] = d[5];
-          break;
-        case PathIterator.SEG_CLOSE:
-          apd(sb, "h", br);
+    for (Shape shape : myGraphics2D.textShapes) {
+      PathIterator pathIterator = shape.getPathIterator(at);
+      while (!pathIterator.isDone()) {
+        switch (pathIterator.currentSegment(d)) {
+          case PathIterator.SEG_MOVETO:
+            apd(sb, d[0], ' ', d[1], " m", br);
+            lastPoint[0] = d[0];
+            lastPoint[1] = d[1];
+            break;
+          case PathIterator.SEG_LINETO:
+            apd(sb, d[0], ' ', d[1], " l", br);
+            lastPoint[0] = d[0];
+            lastPoint[1] = d[1];
+            break;
+          case PathIterator.SEG_QUADTO:
+            controlPoint[0] = d[0] + (lastPoint[0] - d[0]) / 3.0;
+            controlPoint[1] = d[1] + (lastPoint[1] - d[1]) / 3.0;
+            controlPoint[2] = d[0] + (d[2] - d[0]) / 3.0;
+            controlPoint[3] = d[1] + (d[3] - d[1]) / 3.0;
+            apd(sb, controlPoint[0], ' ', controlPoint[1], ' ', controlPoint[2], ' ',
+                controlPoint[3], ' ', d[2], ' ', d[3], " c", br);
+            lastPoint[0] = d[2];
+            lastPoint[1] = d[3];
+            break;
+          case PathIterator.SEG_CUBICTO:
+            apd(sb, d[0], ' ', d[1], ' ', d[2], ' ', d[3], ' ', d[4], ' ', d[5], " c", br);
+            lastPoint[0] = d[4];
+            lastPoint[1] = d[5];
+            break;
+          case PathIterator.SEG_CLOSE:
+            apd(sb, 'h', br);
+        }
+        pathIterator.next();
       }
-      pathIterator.next();
     }
     apd(sb, "f", br); // Fill all paths at once
 
@@ -551,7 +572,7 @@ public class BarExporter {
     writePureEPS(epsArray, colorModel);
 
     ByteArrayOutputStream tiffArray = new ByteArrayOutputStream(10_000);
-    BufferedImage img = createBufferedImage(myTiffRes, myTiffRes, null, myForeground, myBackground);
+    BufferedImage img = createBufferedImage(myTiffRes, myTiffRes, null);
     Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("tiff");
     if (!writers.hasNext())
       throw new IOException("No TIFF ImageWriter found");
@@ -610,43 +631,47 @@ public class BarExporter {
     apd(sb, getColorCommand(myForeground, colorModel, ImageFormat.EPS), br);
     AffineTransform at = new AffineTransform(MM_TO_POINTS, 0.0, 0.0, -MM_TO_POINTS, 0.0, docSize.y);
     at.concatenate(createTransform());
-    for (Rectangle2D r : myGraphics2D.getBarsRectangles(at))
+    for (Rectangle2D r : myGraphics2D.barRectangles) {
+      r = at.createTransformedShape(r).getBounds2D();
       apd(sb, r.getX(), ' ', r.getY(), ' ', r.getWidth(), ' ', r.getHeight(), " r", br);
+    }
     final double[] d = new double[6];
     final double[] lastPoint = new double[2];
     final double[] controlPoint = new double[4];
-    PathIterator pathIterator = myGraphics2D.getTextShapes().getPathIterator(at);
-    while (!pathIterator.isDone()) {
-      switch (pathIterator.currentSegment(d)) {
-        case PathIterator.SEG_MOVETO:
-          apd(sb, d[0], ' ', d[1], " m", br);
-          lastPoint[0] = d[0];
-          lastPoint[1] = d[1];
-          break;
-        case PathIterator.SEG_LINETO:
-          apd(sb, d[0], ' ', d[1], " l", br);
-          lastPoint[0] = d[0];
-          lastPoint[1] = d[1];
-          break;
-        case PathIterator.SEG_QUADTO:
-          controlPoint[0] = d[0] + (lastPoint[0] - d[0]) / 3.0;
-          controlPoint[1] = d[1] + (lastPoint[1] - d[1]) / 3.0;
-          controlPoint[2] = d[0] + (d[2] - d[0]) / 3.0;
-          controlPoint[3] = d[1] + (d[3] - d[1]) / 3.0;
-          apd(sb, controlPoint[0], ' ', controlPoint[1], ' ', controlPoint[2], ' ',
-              controlPoint[3], ' ', d[2], ' ', d[3], " c", br);
-          lastPoint[0] = d[2];
-          lastPoint[1] = d[3];
-          break;
-        case PathIterator.SEG_CUBICTO:
-          apd(sb, d[0], ' ', d[1], ' ', d[2], ' ', d[3], ' ', d[4], ' ', d[5], " c", br);
-          lastPoint[0] = d[4];
-          lastPoint[1] = d[5];
-          break;
-        case PathIterator.SEG_CLOSE:
-          apd(sb, 'h', br);
+    for (Shape shape : myGraphics2D.textShapes) {
+      PathIterator pathIterator = shape.getPathIterator(at);
+      while (!pathIterator.isDone()) {
+        switch (pathIterator.currentSegment(d)) {
+          case PathIterator.SEG_MOVETO:
+            apd(sb, d[0], ' ', d[1], " m", br);
+            lastPoint[0] = d[0];
+            lastPoint[1] = d[1];
+            break;
+          case PathIterator.SEG_LINETO:
+            apd(sb, d[0], ' ', d[1], " l", br);
+            lastPoint[0] = d[0];
+            lastPoint[1] = d[1];
+            break;
+          case PathIterator.SEG_QUADTO:
+            controlPoint[0] = d[0] + (lastPoint[0] - d[0]) / 3.0;
+            controlPoint[1] = d[1] + (lastPoint[1] - d[1]) / 3.0;
+            controlPoint[2] = d[0] + (d[2] - d[0]) / 3.0;
+            controlPoint[3] = d[1] + (d[3] - d[1]) / 3.0;
+            apd(sb, controlPoint[0], ' ', controlPoint[1], ' ', controlPoint[2], ' ',
+                controlPoint[3], ' ', d[2], ' ', d[3], " c", br);
+            lastPoint[0] = d[2];
+            lastPoint[1] = d[3];
+            break;
+          case PathIterator.SEG_CUBICTO:
+            apd(sb, d[0], ' ', d[1], ' ', d[2], ' ', d[3], ' ', d[4], ' ', d[5], " c", br);
+            lastPoint[0] = d[4];
+            lastPoint[1] = d[5];
+            break;
+          case PathIterator.SEG_CLOSE:
+            apd(sb, 'h', br);
+        }
+        pathIterator.next();
       }
-      pathIterator.next();
     }
     apd(sb, "fill", br);
 
@@ -666,8 +691,10 @@ public class BarExporter {
     final StringBuilder sb = new StringBuilder(10_000);
     final Point2D.Double size = getEffectiveSize();
 
-    apd(sb, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>", br);
-    apd(sb, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"", size.x, "mm\" height=\"", size.y,
+    if (!myIsInlineSVG)
+      apd(sb, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>", br);
+    apd(sb, "<svg ", myIsInlineSVG ? "" : "xmlns=\"http://www.w3.org/2000/svg\" ",
+        "width=\"", size.x, "mm\" height=\"", size.y,
         "mm\" viewBox=\"0 0 ", size.x, ' ', size.y, "\">", br);
     if (myTitle != null)
       apd(sb, "<title>", escapeXML(myTitle), "</title>", br);
@@ -678,21 +705,26 @@ public class BarExporter {
 
     apd(sb, "<path fill=\"", getColorForSVG(myForeground), "\" d=\"");
     final double[] d = new double[6];
-    PathIterator pathIterator = myGraphics2D.getAllShapes().getPathIterator(createTransform());
-    while (!pathIterator.isDone()) {
-      switch (pathIterator.currentSegment(d)) {
-        case PathIterator.SEG_MOVETO : apd(sb, 'M', d[0], ',', d[1]);
-          break;
-        case PathIterator.SEG_LINETO : apd(sb, 'L', d[0], ',', d[1]);
-          break;
-        case PathIterator.SEG_QUADTO : apd(sb, 'Q', d[0], ',', d[1], ' ', d[2], ',', d[3]);
-          break;
-        case PathIterator.SEG_CUBICTO: apd(sb, 'C', d[0], ',', d[1], ' ', d[2], ',', d[3], ' ',
-            d[4], ',', d[5]);
-          break;
-        case PathIterator.SEG_CLOSE  : apd(sb, 'Z');
+    AffineTransform at = createTransform();
+    ArrayList<Shape> allShapes = new ArrayList<>(myGraphics2D.textShapes);
+    allShapes.addAll(myGraphics2D.barRectangles);
+    for (Shape shape : allShapes) {
+      PathIterator pathIterator = shape.getPathIterator(at);
+      while (!pathIterator.isDone()) {
+        switch (pathIterator.currentSegment(d)) {
+          case PathIterator.SEG_MOVETO : apd(sb, 'M', d[0], ',', d[1]);
+            break;
+          case PathIterator.SEG_LINETO : apd(sb, 'L', d[0], ',', d[1]);
+            break;
+          case PathIterator.SEG_QUADTO : apd(sb, 'Q', d[0], ',', d[1], ' ', d[2], ',', d[3]);
+            break;
+          case PathIterator.SEG_CUBICTO: apd(sb, 'C', d[0], ',', d[1], ' ', d[2], ',', d[3], ' ',
+              d[4], ',', d[5]);
+            break;
+          case PathIterator.SEG_CLOSE  : apd(sb, 'Z');
+        }
+        pathIterator.next();
       }
-      pathIterator.next();
     }
     apd(sb, "\"/>", br);
 
@@ -794,8 +826,7 @@ public class BarExporter {
 
 
 
-  private BufferedImage createBufferedImage(int dpiResX, int dpiResY, ImageFormat format,
-      Color fgColor, Color bgColor) {
+  private BufferedImage createBufferedImage(int dpiResX, int dpiResY, ImageFormat format) {
     final double resolutionMmX = dpiResX / 25.4;
     final double resolutionMmY = dpiResY / 25.4;
     final Point2D.Double size = getEffectiveSize();
@@ -803,22 +834,22 @@ public class BarExporter {
     final int pxlHeight = Math.round((float)(size.y * resolutionMmY + 0.5));
 
     // Create image with transparency? ('null' here means TIFF preview for EPS)
-    boolean ensureTransparency = !myIsOpaque && (format == ImageFormat.PNG || format == null);
+    boolean ensureTransparency = !myIsOpaque && (format == null || format.supportsTransparency());
 
-    BufferedImage bi;
+    int imageType = BufferedImage.TYPE_3BYTE_BGR;
     if (ensureTransparency) {
-      bi = new BufferedImage(pxlWidth, pxlHeight, BufferedImage.TYPE_INT_ARGB);
-    } else if (format == ImageFormat.JPG && // can we make a grayscale jpeg?
-        fgColor.getRed() == fgColor.getGreen() && fgColor.getGreen() == fgColor.getBlue() &&
-        bgColor.getRed() == bgColor.getGreen() && bgColor.getGreen() == bgColor.getBlue()) {
-      bi = new BufferedImage(pxlWidth, pxlHeight, BufferedImage.TYPE_BYTE_GRAY);
-    } else {
-      bi = new BufferedImage(pxlWidth, pxlHeight, BufferedImage.TYPE_INT_RGB);
+      imageType = BufferedImage.TYPE_INT_ARGB;
+    } else if (myForeground.getRed() == myForeground.getGreen() &&
+               myForeground.getGreen() == myForeground.getBlue() &&
+               myBackground.getRed() == myBackground.getGreen() &&
+               myBackground.getGreen() == myBackground.getBlue()) {
+      imageType = BufferedImage.TYPE_BYTE_GRAY;
     }
+    BufferedImage bi = new BufferedImage(pxlWidth, pxlHeight, imageType);
     Graphics2D g2d = bi.createGraphics();
 
     if (!ensureTransparency) {
-      g2d.setColor(bgColor);
+      g2d.setColor(myBackground);
       g2d.fillRect(0, 0, pxlWidth, pxlHeight);
     }
 
@@ -826,10 +857,12 @@ public class BarExporter {
     at.concatenate(createTransform());
     g2d.setTransform(at);
 
-    g2d.setColor(fgColor);
-    g2d.fill(myGraphics2D.getBarsShapes());
+    g2d.setColor(myForeground);
+    for (Shape s : myGraphics2D.barRectangles)
+      g2d.fill(s);
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2d.fill(myGraphics2D.getTextShapes());
+    for (Shape s : myGraphics2D.textShapes)
+      g2d.fill(s);
 
     g2d.dispose();
     return bi;
@@ -837,7 +870,7 @@ public class BarExporter {
 
 
 
-  private static void toPNG(RenderedImage img, OutputStream out, int dpiResX, int dpiResY)
+  private static void toPNG(BufferedImage img, OutputStream out, int dpiResX, int dpiResY)
       throws IOException {
     final String neededFormatName = "javax_imageio_png_1.0";
     ImageWriter imageWriter = null;
@@ -874,7 +907,7 @@ public class BarExporter {
 
 
 
-  private static void toBMP(RenderedImage img, OutputStream out, int dpiResX, int dpiResY)
+  private static void toBMP(BufferedImage img, OutputStream out, int dpiResX, int dpiResY)
       throws IOException {
     ImageWriter imageWriter = ImageIO.getImageWritersByFormatName("bmp").next();
     ImageWriteParam param = imageWriter.getDefaultWriteParam();
@@ -913,7 +946,7 @@ public class BarExporter {
 
 
 
-  private static void toJPG(RenderedImage img, OutputStream out, int dpiResX, int dpiResY,
+  private static void toJPG(BufferedImage img, OutputStream out, int dpiResX, int dpiResY,
       float quality) throws IOException {
     final String neededFormatName = "javax_imageio_jpeg_image_1.0";
     ImageWriter imageWriter = null;
@@ -968,8 +1001,8 @@ public class BarExporter {
 
   private static class BarcodeGraphics2D extends Graphics2D {
     Graphics2D fontG2D = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_GRAY).createGraphics();
-    ArrayList<Rectangle2D> barsRectangles = new ArrayList<>(40); // Decent default for 1D barcodes
-    Area textShapes = new Area();
+    ArrayList<Rectangle2D> barRectangles = new ArrayList<>(40); // Decent default for 1D barcodes
+    ArrayList<Shape> textShapes = new ArrayList<>(13); // Decent default for 1D barcodes
 
 
     BarcodeGraphics2D() {
@@ -978,37 +1011,15 @@ public class BarExporter {
     }
 
 
-    Rectangle2D[] getBarsRectangles(AffineTransform at) {
-      Rectangle2D[] r = new Rectangle2D[barsRectangles.size()];
-      for (int i=r.length-1; i>=0; i--)
-        r[i] = at.createTransformedShape(barsRectangles.get(i)).getBounds2D();
-      return r;
-    }
-    Area getBarsShapes() {
-      Area a = new Area();
-      for (Rectangle2D r : barsRectangles)
-        a.add(new Area(r));
-      return a;
-    }
-    Area getTextShapes() {
-      return textShapes;
-    }
-    Area getAllShapes() {
-      Area a = getBarsShapes();
-      a.add(textShapes);
-      return a;
-    }
-
-
     // Only a subset of Graphics2D methods is required for this implementation
     public void fill(Shape shape) {
-      barsRectangles.add(shape.getBounds2D());
+      barRectangles.add(shape.getBounds2D());
     }
     public void drawString(String text, float x, float y) {
       FontRenderContext rc = getFontRenderContext();
       char[] c = text.toCharArray();
       GlyphVector gv = getFont().layoutGlyphVector(rc, c, 0, c.length, Font.LAYOUT_LEFT_TO_RIGHT);
-      textShapes.add(new Area(gv.getOutline(x, y)));
+      textShapes.add(gv.getOutline(x, y));
     }
     public void setFont(Font font) { fontG2D.setFont(font); }
     public Font getFont() { return fontG2D.getFont(); }

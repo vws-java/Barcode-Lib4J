@@ -389,10 +389,9 @@ public class GS1Validator {
 
   private static void validateDigits(String value, AI ai) throws BarcodeException {
     if (findNonDigitPosition(value) >= 0)
-      throw new BarcodeException(BarcodeException.CONTENT_NOT_DIGITS,
-          "Value of AI %s may contain only digits and an optional checksum placeholder",
-          "Wert von AI %s darf nur Ziffern und einen optionalen Pr\u00FCfziffer-Platzhalter " +
-              "enthalten", ai.appId);
+      throw new BarcodeException(BarcodeException.CONTENT_INVALID,
+          "Value of AI %s must consist of exactly %s digits",
+          "Wert von AI %s muss aus genau %s Ziffern bestehen", ai.appId, ai.delimiter);
   }
 
 

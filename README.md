@@ -3,7 +3,7 @@
 <div align="center">
   <img width="500" height="110" src="https://github.com/user-attachments/assets/ec774370-63be-4db3-9cb4-e6561918a807" alt="Barcode-Lib4J Logo">
 
-  [![GitHub release](https://img.shields.io/github/v/release/vws-java/Barcode-Lib4J?cacheSeconds=60)](https://github.com/vws-java/Barcode-Lib4J/releases)
+  [![GitHub release](https://img.shields.io/github/v/release/vws-java/Barcode-Lib4J)](https://github.com/vws-java/Barcode-Lib4J/releases)
   [![Maven Central](https://img.shields.io/maven-central/v/de.vwsoft/barcodelib4j.svg)](https://central.sonatype.com/artifact/de.vwsoft/barcodelib4j)
   [![Java](https://img.shields.io/badge/Java-11%2B-blue.svg)](https://www.oracle.com/java/)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)

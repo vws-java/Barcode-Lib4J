@@ -92,4 +92,4 @@
 All 2D barcodes (QR Code, DataMatrix, PDF417, and Aztec) are provided by some slightly modified and seamlessly integrated Java classes from the [ZXing](https://github.com/zxing/zxing) barcode library. A factory class has been added to support the above features as well as GS1 versions of QR Code and DataMatrix.
 
 ## Contributing
-Pull requests are welcome and will be reviewed for inclusion in future releases. Since development is handled locally, contributions are applied during the release process rather than merged directly on GitHub.
+Pull requests are welcome and will be reviewed for inclusion in future releases. Since development is handled locally, contributions are applied during the release process rather than merged directly on GitHub. If Barcode-Lib4J is useful to you, consider giving it a ⭐ – it helps others discover the project.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -93,9 +93,15 @@ public class ImplCode39E extends ImplCode39 {
 
   @Override
   void updateHumanReadableText() {
-    myText = myContentASCII;
+    final int len = myContentASCII.length();
+    StringBuilder sb = new StringBuilder(len + 1);
+    for (int i=0; i<len; i++) {
+      char c = myContentASCII.charAt(i);
+      sb.append(c < 32 || c > 126 ? ' ' : c); // Control characters are not printable
+    }
     if (myOptionalChecksum != null && myIsOptionalChecksumVisible)
-      myText += myOptionalChecksum;
+      sb.append(myOptionalChecksum);
+    myText = sb.toString();
   }
 
 }

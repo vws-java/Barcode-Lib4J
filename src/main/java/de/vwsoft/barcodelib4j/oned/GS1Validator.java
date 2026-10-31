@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -59,7 +59,7 @@ import java.util.regex.Pattern;
  *     optimal and space-saving structure of the encoded data.</li>
  *   <li>Parentheses around AIs are never encoded in the barcode but are displayed in the
  *     human-readable line.</li>
- *   <li>Tip: Place one of your variable-length AIs at the end of your data sequence to save
+ *   <li>Tip: Place an AI that requires an FNC1 separator at the end of your data sequence to save
  *     one FNC1 character.</li>
  * </ol>
  * <p>
@@ -73,7 +73,7 @@ import java.util.regex.Pattern;
  *   <li>Important: AIs with variable-length data must be terminated with FNC1 (unless at end)</li>
  * </ul>
  * <p>
- * <b>SSCC/GTIN Check Digits (AI 00, 01, 02)</b>
+ * <b>SSCC/GTIN Check Digits (AI 00, 01, 02, 03)</b>
  * <p>
  * Use <b>#</b> as placeholder for automatic check digit calculation:
  * <pre>
@@ -86,11 +86,15 @@ import java.util.regex.Pattern;
 public class GS1Validator {
 
   /**
-   * Placeholder character that can be used in SSCC/GTIN numbers (AI 00, 01, 02) in place of the
+   * Placeholder character that can be used in SSCC/GTIN numbers (AI 00, 01, 02, 03) in place of the
    * check digit to force its automatic calculation. As a static non-final variable it can be
    * changed from the default ('#') if needed.
    */
   public static char CHECKSUM_PLACEHOLDER = '#';
+
+  // First two digits of AIs listed in the GenSpecs table of predefined-length AIs (no FNC1)
+  private static final String PREDEFINED_LENGTH_AIS =
+      "00 01 02 03 04 11 12 13 14 15 16 17 18 19 20 31 32 33 34 35 36 41";
 
   private static final int L_FNC1 = -1;
   private static final int L_BRACKET = -2;
@@ -99,7 +103,8 @@ public class GS1Validator {
     new AI("00", 18, "_d{18}"),
     new AI("01", 14, "_d{14}"),
     new AI("02", 14, "_d{14}"),
-    new AI("10", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
+    new AI("03", 14, "_d{14}"),
+    new AI("10", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
     new AI("11", 6), // date YYMMDD
     new AI("12", 6), // date YYMMDD
     new AI("13", 6), // date YYMMDD
@@ -107,19 +112,19 @@ public class GS1Validator {
     new AI("16", 6), // date YYMMDD
     new AI("17", 6), // date YYMMDD
     new AI("20", 2, "_d{2}"),
-    new AI("21", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("22", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("235", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,28}"),
-    new AI("240", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
-    new AI("241", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
-    new AI("242", L_BRACKET, "_d{0,6}"),
-    new AI("243", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("250", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
-    new AI("251", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
-    new AI("253", L_FNC1, "_d{13})([_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,17}"),
-    new AI("254", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
+    new AI("21", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("22", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("235", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,28}"),
+    new AI("240", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("241", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("242", L_BRACKET, "_d{1,6}"),
+    new AI("243", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("250", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("251", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("253", L_FNC1, "_d{13})([_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{0,17}"),
+    new AI("254", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
     new AI("255", L_BRACKET, "_d{13})(_d{0,12}"),
-    new AI("30", L_BRACKET, "_d{0,8}"),
+    new AI("30", L_BRACKET, "_d{1,8}"),
     new AI("310", 5, 6, "_d{6}"),
     new AI("311", 5, 6, "_d{6}"),
     new AI("312", 5, 6, "_d{6}"),
@@ -173,16 +178,17 @@ public class GS1Validator {
     new AI("367", 5, 6, "_d{6}"),
     new AI("368", 5, 6, "_d{6}"),
     new AI("369", 5, 6, "_d{6}"),
-    new AI("37", L_BRACKET, "_d{0,8}"),
-    new AI("390", 9, L_BRACKET, "_d{0,15}"),
-    new AI("391", 9, L_BRACKET, "_d{3})(_d{0,15}"),
-    new AI("392", 9, L_BRACKET, "_d{0,15}"),
-    new AI("393", 9, L_BRACKET, "_d{3})(_d{0,15}"),
+    new AI("37", L_BRACKET, "_d{1,8}"),
+    new AI("390", 9, L_BRACKET, "_d{1,15}"),
+    new AI("391", 9, L_BRACKET, "_d{3})(_d{1,15}"),
+    new AI("392", 9, L_BRACKET, "_d{1,15}"),
+    new AI("393", 9, L_BRACKET, "_d{3})(_d{1,15}"),
     new AI("394", 3, 4, "_d{4}"),
-    new AI("400", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
-    new AI("401", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
+    new AI("395", 5, 6, "_d{6}"),
+    new AI("400", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("401", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
     new AI("402", 17, "_d{17}"),
-    new AI("403", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
+    new AI("403", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
     new AI("410", 13, "_d{13}"),
     new AI("411", 13, "_d{13}"),
     new AI("412", 13, "_d{13}"),
@@ -191,69 +197,123 @@ public class GS1Validator {
     new AI("415", 13, "_d{13}"),
     new AI("416", 13, "_d{13}"),
     new AI("417", 13, "_d{13}"),
-    new AI("420", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("421", L_FNC1, "_d{3})([_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,9}"),
+    new AI("420", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("421", L_FNC1, "_d{3})([_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,9}"),
     new AI("422", 3, "_d{3}"),
-    new AI("423", L_BRACKET, "_d{3})(_d{0,12}"),
+    new AI("423", L_BRACKET, "_d{3})((?:_d{3}){0,4}"),
     new AI("424", 3, "_d{3}"),
-    new AI("425", L_BRACKET, "_d{3})(_d{0,12}"),
+    new AI("425", L_BRACKET, "_d{3})((?:_d{3}){0,4}"),
     new AI("426", 3, "_d{3}"),
-    new AI("427", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,3}"),
+    new AI("427", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,3}"),
+    new AI("4300", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,35}"),
+    new AI("4301", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,35}"),
+    new AI("4302", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4303", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4304", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4305", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4306", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4307", 2, "[_x41-_x5A]{2}"),
+    new AI("4308", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("4309", 20, "_d{20}"),
+    new AI("4310", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,35}"),
+    new AI("4311", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,35}"),
+    new AI("4312", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4313", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4314", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4315", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4316", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("4317", 2, "[_x41-_x5A]{2}"),
+    new AI("4318", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("4319", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("4320", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,35}"),
+    new AI("4321", 1, "[01]"),
+    new AI("4322", 1, "[01]"),
+    new AI("4323", 1, "[01]"),
+    new AI("4324", 10, "_d{10}"),
+    new AI("4325", 10, "_d{10}"),
+    new AI("4326", 6), // date YYMMDD
+    new AI("4330", L_BRACKET, "_d{6}-?"),
+    new AI("4331", L_BRACKET, "_d{6}-?"),
+    new AI("4332", L_BRACKET, "_d{6}-?"),
+    new AI("4333", L_BRACKET, "_d{6}-?"),
     new AI("7001", 13, "_d{13}"),
-    new AI("7002", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
+    new AI("7002", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
     new AI("7003", 10), // Expiration date and time (YYMMDDHHMM)
-    new AI("7004", L_BRACKET, "_d{0,4}"),
-    new AI("7005", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,12}"),
+    new AI("7004", L_BRACKET, "_d{1,4}"),
+    new AI("7005", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,12}"),
     new AI("7006", 6), // First freeze date (YYMMDD)
-    new AI("7007", L_BRACKET, "_d{6,12}"),
-    new AI("7008", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,3}"),
-    new AI("7009", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,10}"),
-    new AI("7010", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,2}"),
-    new AI("7020", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("7021", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("7022", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("7023", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
-    new AI("703", 9, L_FNC1, "_d{3})([_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,27}"),
-    new AI("7040", 4, "_d[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{3}"),
-    new AI("710", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("711", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("712", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("713", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("714", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("723", 9, L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{2,30}"),
-    new AI("7240", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
+    new AI("7007", L_BRACKET, "_d{6}(_d{6})?"),
+    new AI("7008", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,3}"),
+    new AI("7009", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,10}"),
+    new AI("7010", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,2}"),
+    new AI("7011", L_BRACKET, "_d{6}(_d{4})?"),
+    new AI("7020", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("7021", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("7022", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("7023", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("703", 9, L_FNC1, "_d{3})([_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,27}"),
+    new AI("7040", 4, "_d[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{3}"),
+    new AI("7041", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,4}"),
+    new AI("710", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("711", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("712", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("713", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("714", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("715", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("716", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("717", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("723", 9, L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{3,30}"),
+    new AI("7240", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("7241", 2, "_d{2}"),
+    new AI("7242", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,25}"),
+    new AI("7250", 8, "_d{8}"),
+    new AI("7251", 12, "_d{12}"),
+    new AI("7252", 1, "[0129]"),
+    new AI("7253", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,40}"),
+    new AI("7254", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,40}"),
+    new AI("7255", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,10}"),
+    new AI("7256", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("7257", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("7258", 3, "_d/_d"),
+    new AI("7259", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,40}"),
     new AI("8001", 14, "_d{14}"),
-    new AI("8002", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("8003", L_FNC1, "_d{14})([_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,16}"),
-    new AI("8004", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
+    new AI("8002", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("8003", L_FNC1, "0_d{13})([_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{0,16}"),
+    new AI("8004", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
     new AI("8005", 6, "_d{6}"),
-    new AI("8006", L_BRACKET, "_d{14})(_d{2})(_d{2}"),
-    new AI("8007", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,34}"),
+    new AI("8006", 18, "_d{14})(_d{2})(_d{2}"),
+    new AI("8007", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,34}"),
     new AI("8008", L_BRACKET), // Date and time of production (YYMMDDHHMMSS)
-    new AI("8009", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,50}"),
-    new AI("8010", L_BRACKET, "[_x23_x2D_x2F_x30-_x39_x41-_x5A]{0,30}"),
-    new AI("8011", L_BRACKET, "_d{0,12}"),
-    new AI("8012", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,20}"),
-    new AI("8013", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
+    new AI("8009", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,50}"),
+    new AI("8010", L_BRACKET, "[_x23_x2D_x2F_x30-_x39_x41-_x5A]{1,30}"),
+    new AI("8011", L_BRACKET, "_d{1,12}"),
+    new AI("8012", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,20}"),
+    new AI("8013", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,25}"),
+    new AI("8014", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,25}"),
     new AI("8017", 18, "_d{18}"),
     new AI("8018", 18, "_d{18}"),
-    new AI("8019", L_BRACKET, "_d{0,10}"),
-    new AI("8020", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,25}"),
-    new AI("8026", L_BRACKET, "_d{14})(_d{2})(_d{2}"),
-    new AI("8110", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,70}"),
+    new AI("8019", L_BRACKET, "_d{1,10}"),
+    new AI("8020", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,25}"),
+    new AI("8026", 18, "_d{14})(_d{2})(_d{2}"),
+    new AI("8030", L_BRACKET, "[_x2D_x30-_x39_x41-_x5A_x5F_x61-_x7A]{1,90}"), // CSET 64
+    new AI("8040", 15, "_d{15}"),
+    new AI("8041", 15, "_d{15}"),
+    new AI("8042", 32, "_d{32}"),
+    new AI("8043", L_BRACKET, "_d{18,20}"),
+    new AI("8110", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
     new AI("8111", 4, "_d{4}"),
-    new AI("8112", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,70}"),
-    new AI("8200", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,70}"),
-    new AI("90", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,30}"),
-    new AI("91", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}"),
-    new AI("92", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}"),
-    new AI("93", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}"),
-    new AI("94", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}"),
-    new AI("95", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}"),
-    new AI("96", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}"),
-    new AI("97", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}"),
-    new AI("98", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}"),
-    new AI("99", L_FNC1, "[_x21-_x22_x25-_x2F_x30-_x39_x41-_x5A_x5F_x61-_x7A]{0,90}")
+    new AI("8112", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("8200", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,70}"),
+    new AI("90", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,30}"),
+    new AI("91", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("92", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("93", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("94", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("95", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("96", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("97", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("98", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}"),
+    new AI("99", L_FNC1, "[_x21-_x22_x25-_x3F_x41-_x5A_x5F_x61-_x7A]{1,90}")
   };
 
 
@@ -342,16 +402,23 @@ public class GS1Validator {
             "Value of AI %s must consist of %s characters; Provided: %s",
             "Wert von AI %s muss aus %s Zeichen bestehen; Aktuell: %s",
             ai.appId, ai.delimiter, data.length());
-      if (ai == APP_IDS[0] || ai == APP_IDS[1] || ai == APP_IDS[2]) {
-        if (data.charAt(ai.delimiter - 1) == CHECKSUM_PLACEHOLDER) {
-          data = data.substring(0, ai.delimiter - 1);
-          validateDigits(data, ai);
-          data += calculateModulo10(data);
-        } else {
-          validateDigits(data, ai);
-          validateModulo10(data);
-        }
-      } else if (!ai.matches(data)) {
+
+      int csumLen; // AIs whose leading digits end with a mod-10 check digit
+      switch (ai.appId) {
+        case "00": case "8017": case "8018": csumLen = 18;                                    break;
+        case "01": case "02": case "03": case "8003": case "8006": case "8026": csumLen = 14; break;
+        case "253": case "255": case "410": case "411": case "412": case "413": case "414":
+                    case "415": case "416": case "417": csumLen = 13;                         break;
+        case "402": csumLen = 17;                                                             break;
+        default:    csumLen = 0;
+      }
+      if (ai.appId.charAt(0) == '0' && data.charAt(csumLen - 1) == CHECKSUM_PLACEHOLDER) { // 00-03
+        String digits = data.substring(0, csumLen - 1);
+        if (findNonDigitPosition(digits) < 0) // otherwise matches() reports the error
+          data = digits + calculateModulo10(digits) + data.substring(csumLen);
+      }
+
+      if (!ai.matches(data)) {
         if (ai.isYYMMDD())
           throw new BarcodeException(BarcodeException.CONTENT_INVALID,
               "Value of AI %s is not a real date in YYMMDD format",
@@ -360,6 +427,8 @@ public class GS1Validator {
           throw new BarcodeException(BarcodeException.CONTENT_INVALID,
               "Value of AI %s does not conform to its schema",
               "Wert von AI %s entspricht nicht dessen Schema", ai.appId);
+      } else if (csumLen > 0) {
+        validateModulo10(data.substring(0, csumLen));
       }
 
       sbContent.append(data);
@@ -367,7 +436,7 @@ public class GS1Validator {
       if (k == len)
         break;
       idx = k;
-      if (ai.delimiter < 0)
+      if (!PREDEFINED_LENGTH_AIS.contains(ai.appId.substring(0, 2)))
         sbContent.append(fnc1Char);
     }
 
@@ -383,15 +452,6 @@ public class GS1Validator {
 
     myContent = sbContent.toString();
     myText = sbText.toString();
-  }
-
-
-
-  private static void validateDigits(String value, AI ai) throws BarcodeException {
-    if (findNonDigitPosition(value) >= 0)
-      throw new BarcodeException(BarcodeException.CONTENT_INVALID,
-          "Value of AI %s must consist of exactly %s digits",
-          "Wert von AI %s muss aus genau %s Ziffern bestehen", ai.appId, ai.delimiter);
   }
 
 
@@ -422,7 +482,7 @@ public class GS1Validator {
 
     private static Map<Integer,DateTimeFormatter> dateTimeFormatters = Map.of(
 
-      // AI 11, 12, 13, 15, 16, 17, 7006
+      // AI 11, 12, 13, 15, 16, 17, 4326, 7006
       6,    new DateTimeFormatterBuilder().parseStrict().appendPattern("uuMMdd")     // YYMMDD
                 .toFormatter().withResolverStyle(ResolverStyle.STRICT),
 
@@ -476,6 +536,8 @@ public class GS1Validator {
     boolean matches(String data) {
       if (pattern != null)
         return pattern.matcher(data).matches();
+      if (appId.length() == 2 && data.endsWith("00")) // AI 11-17 (YYMMD0): day "00" is valid
+        data = data.substring(0, 4) + "01";
       try {
         dateTimeFormatters.get(delimiter > 0 ? delimiter : Integer.parseInt(appId)).parse(data);
         return true;

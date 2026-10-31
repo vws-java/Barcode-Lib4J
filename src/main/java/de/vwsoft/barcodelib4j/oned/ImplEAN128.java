@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -50,15 +50,25 @@ public class ImplEAN128 extends ImplCode128 {
    * @param content                the GS1 data to be encoded in the barcode
    * @param autoComplete           has no function in this method implementation
    * @param appendOptionalChecksum has no function in this method implementation
-   * @throws BarcodeException      if the provided content is empty,
-   *                               or does not comply with the GS1 standard
+   * @throws BarcodeException      if the provided content is empty, does not comply with the GS1
+   *                               standard, or exceeds 48 data characters (including Application
+   *                               Identifiers and FNC1 separators)
    */
   @Override
   public void setContent(String content, boolean autoComplete, boolean appendOptionalChecksum)
       throws BarcodeException {
+
     GS1Validator gs1 = new GS1Validator(content, FNC1);
-    myContent = FNC1 + gs1.getContent();
+    content = gs1.getContent();
+
+    if (content.length() > 48)
+      throw new BarcodeException(BarcodeException.CONTENT_LENGTH_INVALID,
+          "GS1-128 is limited to 48 data characters; Provided: %s",
+          "GS1-128 ist auf 48 Datenzeichen begrenzt; Aktuell: %s", content.length());
+
+    myContent = FNC1 + content;
     myText = gs1.getText();
+
     invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }
 

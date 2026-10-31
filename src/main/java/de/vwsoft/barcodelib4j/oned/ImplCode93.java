@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -88,8 +88,13 @@ public class ImplCode93 extends Barcode {
       throws BarcodeException {
     validateNotEmpty(content);
 
-    if (autoComplete)
-      content = content.toUpperCase();
+    if (autoComplete) { // convert ASCII letters only, independent of the default locale
+      char[] chars = content.toCharArray();
+      for (int i=0; i<chars.length; i++)
+        if (chars[i] >= 'a' && chars[i] <= 'z')
+          chars[i] -= 32;
+      content = new String(chars);
+    }
 
     final String validChars = CHARS.substring(0, 43);
     for (int len=content.length(), i=0; i!=len; i++)

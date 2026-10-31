@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/

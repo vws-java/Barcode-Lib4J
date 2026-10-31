@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -70,10 +70,13 @@ public class ImplSSCC18 extends ImplEAN128 {
   public void setContent(String content, boolean autoComplete, boolean appendOptionalChecksum)
       throws BarcodeException {
 
-    if (autoComplete && content.length() == 17) {
-      validateDigits(content);
+    validateNotEmpty(content);
+    validateDigits(content);
+
+    if (autoComplete && content.length() == 17)
       content += calculateModulo10(content);
-    }
+    else
+      validateFixedLength(content, 18);
 
     super.setContent("00" + content, false, false);
   }

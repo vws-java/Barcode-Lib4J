@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -193,19 +193,14 @@ public abstract class UPCEANFamily extends Barcode {
     final double widthOfASingleBar = w / myBarsCount;
     final int leftQuietZone = getQuietZoneLeft();
 
+    final Font g2dFont = g2d.getFont();
     double fontHeight = 0.0;
     if (myIsTextVisible) {
-      final Font font = myFont != null ? myFont : g2d.getFont();
+      final Font font = myFont != null ? myFont : g2dFont;
       float fontSize = font.getSize2D();
-      if (myIsFontSizeAdjusted) {
-        fontSize = 0F;
-        final double m = (myNumberPart2.length() * 7) * widthOfASingleBar;
-        do {
-          fontSize += FONT_SIZE_INCREMENT;
-          g2d.setFont(font.deriveFont(fontSize));
-        } while (g2d.getFontMetrics().getStringBounds(myNumberPart2, g2d).getWidth() < m);
-        fontSize -= FONT_SIZE_INCREMENT;
-      }
+      if (myIsFontSizeAdjusted)
+        fontSize = fitFontSize(g2d, font, myNumberPart2,
+            (myNumberPart2.length() * 7) * widthOfASingleBar);
 
       if (fontSize > 0F) {
         g2d.setFont(font.deriveFont(fontSize));
@@ -250,12 +245,7 @@ public abstract class UPCEANFamily extends Barcode {
         final double textWidth = (overhang * 2 + 95) * widthOfASingleBar;
 
         Font font2 = new Font(Font.SANS_SERIF, Font.PLAIN, 1);
-        float fontSize2 = 0F;
-        do {
-          fontSize2 += FONT_SIZE_INCREMENT;
-          g2d.setFont(font2.deriveFont(fontSize2));
-        } while (g2d.getFontMetrics().getStringBounds(myText, g2d).getWidth() < textWidth);
-        fontSize2 -= FONT_SIZE_INCREMENT;
+        float fontSize2 = fitFontSize(g2d, font2, myText, textWidth);
 
         if (fontSize2 > 0F) {
           g2d.setFont(font2.deriveFont(fontSize2));
@@ -265,6 +255,7 @@ public abstract class UPCEANFamily extends Barcode {
               (float)(y - fm.getLineMetrics(myText, g2d).getDescent()));
         }
       }
+      g2d.setFont(g2dFont);
     }
 
     final double nonGuardBarHeight = h - fontHeight;
@@ -335,6 +326,10 @@ public abstract class UPCEANFamily extends Barcode {
       if (isDigit(c)) {
         sb.append(c);
       } else if (c == '-') {
+        if (sb.length() == 0)
+          throw new BarcodeException(BarcodeException.CONTENT_INVALID,
+              "Empty segment at position %s",
+              "Leerer Teil an Position %s", i);
         if (tokens.size() == 4)
           throw new BarcodeException(BarcodeException.CONTENT_INVALID,
               "Number has more than 5 segments",

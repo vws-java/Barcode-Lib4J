@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -132,7 +132,7 @@ public class ImplITF extends Barcode {
       if (autoComplete)
         content = "0" + content;
       else
-        throwContentLengthNotEven(content.length());
+        throwContentLengthNotEven(content.length() + (appendOptionalChecksum ? 1 : 0));
     }
 
     myContent = content;

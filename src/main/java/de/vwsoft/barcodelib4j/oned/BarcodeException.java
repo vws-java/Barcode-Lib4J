@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -57,6 +57,7 @@ import java.util.Locale;
  * </ul>
  */
 public class BarcodeException extends Exception {
+  private static final long serialVersionUID = 1L;
 
   /** Exception ID indicating empty content. */
   public static final int CONTENT_EMPTY = 105;
@@ -122,9 +123,16 @@ public class BarcodeException extends Exception {
 
 
   private static String fillInserts(String message, Object[] inserts) {
-    for (Object o : inserts)
-      message = message.replaceFirst("%s", o.toString());
-    return message;
+    StringBuilder sb = new StringBuilder(message.length() + 16 * inserts.length);
+    int pos = 0;
+    for (Object o : inserts) {
+      int i = message.indexOf("%s", pos);
+      if (i < 0)
+        break;
+      sb.append(message, pos, i).append(o);
+      pos = i + 2;
+    }
+    return sb.append(message, pos, message.length()).toString();
   }
 
 

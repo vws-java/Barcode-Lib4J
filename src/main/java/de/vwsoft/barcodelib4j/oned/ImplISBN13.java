@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -83,6 +83,10 @@ public class ImplISBN13 extends ImplEAN13 {
       throw new BarcodeException(BarcodeException.CONTENT_INVALID,
           "Invalid prefix; Expected: 978- or 979-",
           "Ung\u00FCltiges Pr\u00E4fix; Erwartet: 978- oder 979-");
+    if (content.startsWith("979-0"))
+      throw new BarcodeException(BarcodeException.CONTENT_INVALID,
+          "Prefix 979-0 is reserved for ISMN",
+          "Pr\u00E4fix 979-0 ist f\u00FCr ISMN reserviert");
 
     setContentISxN(content, autoComplete, "ISBN");
 

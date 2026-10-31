@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -79,7 +79,12 @@ public class ImplCode93E extends ImplCode93 {
       sb.append(CHARS_EXT[content.charAt(i)]);
 
     myContent = sb.toString();
-    myText = content;
+    StringBuilder text = new StringBuilder(len);
+    for (int i=0; i<len; i++) {
+      char c = content.charAt(i);
+      text.append(c < 32 || c > 126 ? ' ' : c); // Control characters are not printable
+    }
+    myText = text.toString();
 
     invalidateDrawing(); // Reset cached bars to force recalculation on the next drawing
   }

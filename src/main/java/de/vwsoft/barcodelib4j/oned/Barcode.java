@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -223,6 +223,9 @@ public abstract class Barcode implements Cloneable {
    * Sets a custom text for the barcode to replace the automatically generated human readable text.
    * <p>
    * This must be supported by the given barcode type. See: {@link #supportsCustomText()}
+   * <p>
+   * Note: This method should be called last, as some of the other methods may replace a custom text
+   * with the automatically generated text.
    *
    * @param text the custom text to set for the barcode
    * @throws NullPointerException if the custom text is {@code null}
@@ -495,6 +498,7 @@ public abstract class Barcode implements Cloneable {
    */
   public void setRatio(float ratio) {
     if (supportsRatio()) {
+      ratio = Float.isNaN(ratio) ? 2.5F : Math.max(2.0F, Math.min(3.0F, ratio));
       int narrLen = 10;
       int wideLen = Math.round(ratio * 10F);
       for (int i=10; i>1; i--) {
@@ -635,13 +639,13 @@ public abstract class Barcode implements Cloneable {
 
     if (moduleSize > 0.0) {
       if (dotSize > 0.0)
-        moduleSize = (int)(moduleSize / dotSize) * dotSize;
+        moduleSize = (int)(moduleSize / dotSize + 1e-9) * dotSize;
       double d = moduleSize * myModuleFactor;
       x += (w - d) / 2.0;
       w = d;
     } else if (dotSize > 0.0) {
       double d = w / myModuleFactor;
-      d = w * (int)(d / dotSize) * dotSize / d;
+      d = w * (int)(d / dotSize + 1e-9) * dotSize / d;
       x += (w - d) / 2.0;
       w = d;
     }
@@ -695,21 +699,16 @@ public abstract class Barcode implements Cloneable {
       prepareDrawing();
 
     final Rectangle2D.Double rect = new Rectangle2D.Double(0.0, y, 0.0, h);
+    final Font g2dFont = g2d.getFont();
     if (myIsTextVisible) {
       final String text = getText();
       final double moduleWidth = w / myModuleFactor;
       final double leftQuietZone = moduleWidth * getQuietZoneLeft();
       final double symbolWidth = w - leftQuietZone - moduleWidth * getQuietZoneRight();
-      final Font font = myFont != null ? myFont : g2d.getFont();
+      final Font font = myFont != null ? myFont : g2dFont;
       float fontSize = font.getSize2D();
-      if (myIsFontSizeAdjusted) {
-        fontSize = 0F;
-        do {
-          fontSize += FONT_SIZE_INCREMENT;
-          g2d.setFont(font.deriveFont(fontSize));
-        } while (g2d.getFontMetrics().getStringBounds(text, g2d).getWidth() < symbolWidth);
-        fontSize -= FONT_SIZE_INCREMENT;
-      }
+      if (myIsFontSizeAdjusted)
+        fontSize = fitFontSize(g2d, font, text, symbolWidth);
 
       if (fontSize > 0F) {
         g2d.setFont(font.deriveFont(fontSize));
@@ -727,6 +726,7 @@ public abstract class Barcode implements Cloneable {
         g2d.drawString(text, (float)(x + leftQuietZone + (symbolWidth -
             fm.getStringBounds(text, g2d).getWidth()) / 2.0), (float)(y + yPos));
       }
+      g2d.setFont(g2dFont);
     }
 
     final double barWidth = w / myBarsCount;
@@ -737,6 +737,31 @@ public abstract class Barcode implements Cloneable {
       rect.width = barWidth * myBars[i] + bwcTwice;
       g2d.fill(rect);
     }
+  }
+
+
+
+  static float fitFontSize(Graphics2D g2d, Font font, String text, double maxWidth) {
+    int lo = 0, hi = 1;
+    while (hi <= 100_000 && textWidth(g2d, font, text, hi * FONT_SIZE_INCREMENT) < maxWidth)
+      hi <<= 1;
+    if (hi > 100_000)
+      return 0F;
+    while (hi - lo > 1) {
+      int mid = (lo + hi) >>> 1;
+      if (textWidth(g2d, font, text, mid * FONT_SIZE_INCREMENT) < maxWidth)
+        lo = mid;
+      else
+        hi = mid;
+    }
+    return lo * FONT_SIZE_INCREMENT;
+  }
+
+
+
+  private static double textWidth(Graphics2D g2d, Font font, String text, float size) {
+    g2d.setFont(font.deriveFont(size));
+    return g2d.getFontMetrics().getStringBounds(text, g2d).getWidth();
   }
 
 

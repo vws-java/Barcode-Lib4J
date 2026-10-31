@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -93,17 +93,20 @@ public class ImplPZN8 extends ImplCode39 {
     validateNotEmpty(content);
     validateDigits(content);
 
-    if (autoComplete && content.length() == 7) {
-      int checksum = calculateChecksum(content);
-      if (checksum == 10)
-        throw new BarcodeException(BarcodeException.CHECKSUM_INVALID,
-            "Invalid PZN8: Checksum cannot be 10",
-            "Ung\u00FCltige PZN8: Pr\u00FCfziffer darf nicht 10 sein");
-      content += checksum;
-    } else {
+    final boolean appendCheckDigit = autoComplete && content.length() == 7;
+    if (!appendCheckDigit)
       validateFixedLength(content, 8);
-      validateCheckDigit(content.charAt(7) - 48, calculateChecksum(content));
-    }
+
+    final int checksum = calculateChecksum(content);
+    if (checksum == 10)
+      throw new BarcodeException(BarcodeException.CHECKSUM_INVALID,
+          "Invalid PZN8: Checksum cannot be 10",
+          "Ung\u00FCltige PZN8: Pr\u00FCfziffer darf nicht 10 sein");
+
+    if (appendCheckDigit)
+      content += checksum;
+    else
+      validateCheckDigit(content.charAt(7) - 48, checksum);
 
     myContent = '-' + content;
 

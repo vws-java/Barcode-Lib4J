@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Viktor Wedel
+ * Copyright (c) 2026 Viktor Wedel
  *
  * Website EN: https://www.vw-software.com/java-barcode-library/
  * Website DE: https://www.vwsoft.de/barcode-library-for-java/
@@ -185,6 +185,10 @@ public class ImplCode128 extends Barcode {
 
 
   private static int chooseCodeSet(String content, int idx, int oldCodeSet) {
+    if (idx > 0 && content.charAt(idx - 1) == FNC4) {
+      char c = content.charAt(idx);
+      return c < ' ' ? CODESET_A : c >= '`' ? CODESET_B : oldCodeSet;
+    }
     int forward = chooseSetCType(content, idx);
     if (forward == SETC_ONE_DIGIT)
       return CODESET_B;
@@ -264,8 +268,13 @@ public class ImplCode128 extends Barcode {
           throwContentLengthNotEven(len);
       }
     } else {
-      if (myCodeSet == CODESET_A && autoComplete)
-        content = content.toUpperCase();
+      if (myCodeSet == CODESET_A && autoComplete) {
+        char[] chars = content.toCharArray();
+        for (int i=0; i<len; i++)
+          if (chars[i] >= 'a' && chars[i] <= 'z')
+            chars[i] -= 32;
+        content = new String(chars);
+      }
       StringBuilder sb = new StringBuilder(len);
       for (int i=0; i<len; i++) {
         char c = content.charAt(i);
@@ -274,7 +283,7 @@ public class ImplCode128 extends Barcode {
               (myCodeSet == CODESET_B && c < ' ') ||
               (c > 127))
             throwInvalidCharacter(i);
-        sb.append(c < 32 || c > 127 ? ' ' : c);
+        sb.append(c < 32 || c > 126 ? ' ' : c);
       }
       myText = sb.toString();
     }

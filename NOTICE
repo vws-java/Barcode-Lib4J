@@ -1,13 +1,11 @@
 
-                            Barcode-Lib4J v3.2.0
+                            Barcode-Lib4J v3.3.0
 
 
 Java Version and Dependencies
 =============================
 
-Java 11 or later is required. OpenPDF library v1.3.0 or higher is optionally
-needed for PDF export functionality. Please ensure the used version is
-compatible with your Java version!
+Java 11 or later is required. No external dependencies!
 
 
 Copyright
